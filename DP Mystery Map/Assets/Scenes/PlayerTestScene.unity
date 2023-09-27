@@ -261,34 +261,16 @@ GameObject:
   m_Component:
   - component: {fileID: 172506154}
   - component: {fileID: 172506153}
-  - component: {fileID: 172506152}
   - component: {fileID: 172506155}
   - component: {fileID: 172506156}
+  - component: {fileID: 172506157}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &172506152
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 172506151}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7af2363398f4d234e8c07ec392d8d75b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  moveUpKey: 119
-  moveDownKey: 115
-  moveLeftKey: 97
-  moveRightKey: 100
-  facingDirection: 0
-  rigidBody: {fileID: 172506156}
 --- !u!212 &172506153
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -428,6 +410,25 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
+--- !u!114 &172506157
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 172506151}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3117d09140b1981418623ced53da35eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerRigidbody: {fileID: 172506156}
+  interactColliderTransform: {fileID: 0}
+  speed: 5
+  moveUpKey: 119
+  moveDownKey: 115
+  moveLeftKey: 97
+  moveRightKey: 100
 --- !u!1 &858354363
 GameObject:
   m_ObjectHideFlags: 0
