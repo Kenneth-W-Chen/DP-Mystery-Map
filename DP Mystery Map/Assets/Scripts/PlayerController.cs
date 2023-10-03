@@ -9,6 +9,12 @@ using UnityEngine;
 /// </summary>
 public class PlayerController : MonoBehaviour
 {
+
+    public void toggleMovement()
+    {
+        IsGridMovement = !IsGridMovement;
+    }
+    
     /// <summary>
     /// How long each step should take
     /// </summary>
