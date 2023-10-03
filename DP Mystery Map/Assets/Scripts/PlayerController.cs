@@ -15,10 +15,13 @@ public class PlayerController : MonoBehaviour
     
     private MovePlayerUpdate _movePlayerUpdate;
     private MovePlayerFixedUpdate _movePlayerFixedUpdate;
-
+    private DirectionChangeEventHandler _updateColliderHandler;
+    
     private delegate void MovePlayerUpdate();
 
     private delegate void MovePlayerFixedUpdate();
+
+    
 
     private bool _isGridMovement;
     private float _xMovement;
@@ -50,7 +53,11 @@ public class PlayerController : MonoBehaviour
     //Todo sort these
     private const float WalkDuration = .25f;
     private const float StepSize = 1f;
-    private const float KeyPushedDuration = .25f;
+    
+    /// <summary>
+    /// The duration to consider a key held down rather than pressed
+    /// </summary>
+    private const float KeyHeldMinDuration = .25f;
 
     //_walkOn determines if the rigidbody should keep moving once it reaches its position
     private bool _walkOn = false;
@@ -81,9 +88,13 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // Initialize movement functions
         _movePlayerUpdate = GridMoveUpdate;
         _movePlayerFixedUpdate = GridMoveFixedUpdate;
         _isGridMovement = true;
+        
+        _updateColliderHandler = UpdateColliders;
+        SubscribeEvents();
         
         // Initialization of free movement values
         _tanSpeed = speed * .707f;
@@ -117,7 +128,6 @@ public class PlayerController : MonoBehaviour
     
     private void GridMoveUpdate()
     {
-        Debug.Log("called");
         //check if key was pressed down
         if (_keyHeld)
         {
@@ -136,22 +146,28 @@ public class PlayerController : MonoBehaviour
             {
                 _keyHeld = false;
                 _walkOn = false;
-                if (timeSincePress <= KeyPushedDuration)
+                if (timeSincePress <= KeyHeldMinDuration)
                 {
                     if (Player.FacingDirection == _walkDirection)
                     {
                         UpdateMovementVals();
                         _walkOnce = true;
                     }
+                    else
+                    {
+                        Player.FacingDirection = _walkDirection;
+                    }
                 }
                 else
                 {
+                    // do nothing? Key is considered held down at this point, but FixedUpdate turns off walking flag automatically
+                    // probably not needed
                 }
 
                 /*else FacingDirection = _walkDirection;*/
             }
             //else we check to see if enough time has passed to consider the button held down
-            else if (timeSincePress > KeyPushedDuration)
+            else if (timeSincePress > KeyHeldMinDuration)
             {
                 /*Debug.Log("Turning on walk");*/
                 _walkOn = true;
@@ -230,10 +246,10 @@ public class PlayerController : MonoBehaviour
         }*/
     }
     
-    void UpdateColliders()
+    void UpdateColliders(Direction oldDirection, Direction newDirection)
     {
         // For rotating the interact collider to the side the player is facing
-        interactColliderTransform.transform.localRotation = Quaternion.Euler(0, 0, Player.FacingDirection switch
+        interactColliderTransform.transform.localRotation = Quaternion.Euler(0, 0, newDirection switch
         {
             Direction.Up => 0,
             Direction.Down => 180,
@@ -323,5 +339,11 @@ public class PlayerController : MonoBehaviour
             Direction.Right => _startPos + StepSize * Vector2.right,
             _ => _endPos
         };
+    }
+
+    // Subscribes functions to events
+    private void SubscribeEvents()
+    {
+        Player.DirectionChangeEvent += _updateColliderHandler;
     }
 } 
