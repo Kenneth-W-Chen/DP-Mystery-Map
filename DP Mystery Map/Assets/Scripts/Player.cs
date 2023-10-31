@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 
 namespace PlayerInfo
@@ -18,7 +21,7 @@ namespace PlayerInfo
     /// <summary>
     /// Bitflag for items
     /// </summary>
-    [Flags]
+    [Flags, Serializable]
     public enum Item:short
     {
        None = 0,
@@ -61,6 +64,8 @@ namespace PlayerInfo
         public static KeyCode MoveDownKey = KeyCode.S;
         public static KeyCode MoveLeftKey = KeyCode.A;
         public static KeyCode MoveRightKey = KeyCode.D;
+
+        public static string SaveFilePath = $"{Path.Combine(PlayerSave.defaultSavePath, "save1")}";
 
         /// <summary>
         /// The items the player has collected
@@ -165,6 +170,91 @@ namespace PlayerInfo
             _facingDirection = Direction.Up;
             _health = MaxHealth;
         }
+
+        public static void loadData(PlayerSave save)
+        {
+            
+        }
     }
     
+    /// <summary>
+    /// This class holds information for player info to be serialized.
+    /// For class member documentation, see <see cref="Player"/> members of same names
+    /// </summary>
+    [System.Serializable]
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    public class PlayerSave
+    {
+        /// <summary>
+        /// The default path for save game files
+        /// </summary>
+        public static readonly string defaultSavePath = $"{Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),"DP-Map-Saves")}";
+        /// <summary>
+        /// BinaryFormatter used for serializing data
+        /// </summary>
+        public static BinaryFormatter bf = new BinaryFormatter();
+        
+        /*public KeyCode MoveUpKey;
+        public KeyCode MoveDownKey;
+        public KeyCode MoveLeftKey;
+        public KeyCode MoveRightKey;*/
+        
+        public Item _collectedItems;
+        public Direction _facingDirection;
+        
+        public Vector2 position;
+        public string SaveFilePath;
+        
+        /// <summary>
+        /// Saves player information to file
+        /// </summary>
+        /// <exception cref="Exception">No data able to be saved</exception>
+        public void Save()
+        {
+            // consider removing, the save button should not be accessible outside of the game
+            if (PlayerController.playerControllerReference is null)
+                throw new Exception("No player object instantiated.");
+            SaveData();
+            SerializeData();
+        }
+        
+        /// <summary>
+        /// Loads the save file information from the disk to the object.
+        /// Does not load the data into the game state. Use <see cref="loadData"/> to load game data.
+        /// </summary>
+        /// <param name="saveFileName">Name of the save file.</param>
+        /// <param name="fullPath">Set to true if <see cref="saveFileName"/> is the full path of the save file. Defaults to only filename.</param>
+        public void loadFile(string saveFileName, bool fullPath = false)
+        {
+            
+        }
+
+        public void loadData()
+        {
+            Player.loadData(this);
+        }
+
+        /// <summary>
+        /// Saves current data to the object
+        /// </summary>
+        private void SaveData()
+        {
+            /*MoveUpKey = Player.MoveUpKey;
+            MoveDownKey = Player.MoveDownKey;
+            MoveLeftKey = Player.MoveDownKey;
+            MoveRightKey = Player.MoveRightKey;*/
+            SaveFilePath = Player.SaveFilePath;
+            _collectedItems = Player.collectedItems;
+            _facingDirection = Player.FacingDirection;
+            position = (Vector2) PlayerController.playerControllerReference.transform.position;
+        }
+
+        private void SerializeData()
+        {
+            using (FileStream fs = new FileStream(SaveFilePath, FileMode.Create, FileAccess.Write))
+            {
+                bf.Serialize(fs, this);
+            }
+        }
+    }
 }
