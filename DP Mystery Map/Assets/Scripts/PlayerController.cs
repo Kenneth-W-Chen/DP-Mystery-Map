@@ -9,11 +9,7 @@ using UnityEngine;
 /// </summary>
 public class PlayerController : MonoBehaviour
 {
-
-    public void toggleMovement()
-    {
-        IsGridMovement = !IsGridMovement;
-    }
+    public static PlayerController playerControllerReference;
     
     /// <summary>
     /// How long each step should take
@@ -113,10 +109,22 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
+    
+    public void toggleMovement()
+    {
+        IsGridMovement = !IsGridMovement;
+    }
 
     // Start is called before the first frame update
     void Start()
     {
+        if (playerControllerReference is not null)
+        {
+            Destroy(this.gameObject);
+            return;
+        }
+
+        playerControllerReference = this;
         // Initialize movement functions
         _movePlayerUpdate = GridMoveUpdate;
         _movePlayerFixedUpdate = GridMoveFixedUpdate;
@@ -153,6 +161,8 @@ public class PlayerController : MonoBehaviour
     private void OnDestroy()
     {
         UnsubscribeEvents();
+        if (playerControllerReference == this)
+            playerControllerReference = null;
     }
 
     private void FreeMoveUpdate()
