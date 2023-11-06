@@ -21,19 +21,6 @@ public class NewGameSetup : MonoBehaviour
 
     private static readonly Color Transparent = new Color(0, 0, 0, 0);
     
-    // Start is called before the first frame update
-    void Start()
-    {
-        content.SetActive(false);
-        overlay.color = Transparent;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     /// <summary>
     /// Shows the prompt for major selection
     /// </summary>
