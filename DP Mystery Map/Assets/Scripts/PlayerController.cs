@@ -149,7 +149,12 @@ public class PlayerController : MonoBehaviour
     {
         _movePlayerFixedUpdate();
     }
-    
+
+    private void OnDestroy()
+    {
+        UnsubscribeEvents();
+    }
+
     private void FreeMoveUpdate()
     {
         // Intentionally empty
@@ -353,6 +358,11 @@ public class PlayerController : MonoBehaviour
     // Subscribes functions to events
     private void SubscribeEvents()
     {
-        Player.DirectionChangeEvent += _updateColliderHandler;
+        Player.directionChangeEvent += _updateColliderHandler;
+    }
+
+    private void UnsubscribeEvents()
+    {
+        Player.directionChangeEvent -= _updateColliderHandler;
     }
 } 
