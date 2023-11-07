@@ -35,6 +35,18 @@ namespace PlayerInfo
     }
 
     /// <summary>
+    /// Enum describing which major the player has
+    /// </summary>
+    public enum Major:short
+    {
+        None = 0,
+        ComputerEngineering = 1,
+        ComputerScience = 2,
+        ElectricalEngineering = 3,
+        MechanicalEngineering = 4
+    }
+    
+    /// <summary>
     /// Event handler delegate that is fired when the player collects all items.
     /// </summary>
     public delegate void ALlItemsCollectedEventHandler();
@@ -78,6 +90,11 @@ namespace PlayerInfo
         /// </summary>
         private static Direction _facingDirection = Direction.Up;
 
+        /// <summary>
+        /// The player's major
+        /// </summary>
+        private static Major _major = Major.None;
+        
         /// <summary>
         /// Player health
         /// </summary>
@@ -151,6 +168,12 @@ namespace PlayerInfo
             }
         }
 
+        public static Major major
+        {
+            get=>_major;
+            set => _major = value;
+        }
+
         /// <summary>
         /// Resets control bindings to the defaults.
         /// </summary>
@@ -177,6 +200,7 @@ namespace PlayerInfo
             SaveFilePath = save.SaveFilePath;
             _collectedItems = save._collectedItems;
             _facingDirection = save._facingDirection;
+            _major = save._major;
             _health = MaxHealth;
             if (PlayerController.playerControllerReference is not null)
                 PlayerController.playerControllerReference.transform.position = save.position;
@@ -211,6 +235,7 @@ namespace PlayerInfo
         
         public Item _collectedItems;
         public Direction _facingDirection;
+        public Major _major;
         
         public Vector2 position;
         
@@ -251,6 +276,7 @@ namespace PlayerInfo
                 {
                     this._collectedItems = temp._collectedItems;
                     this._facingDirection = temp._facingDirection;
+                    this._major = temp._major;
                     this.position = temp.position;
                     this.SaveFilePath = saveFileName;
                 }
