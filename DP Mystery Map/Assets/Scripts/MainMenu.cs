@@ -26,6 +26,10 @@ public class MainMenu : MonoBehaviour
     public List<Button> saveFileButtons;
     public List<Animator> saveFileAnimator;
     
+    public List<GameObject> saveFileInfos;
+    public List<TMP_Text> saveFileMajors;
+    public List<GameObject> saveFileCollectedItemsNone;
+    
     private static readonly Color Transparent = new Color(0, 0, 0, 0);
     
     private List<PlayerSave> m_PlayerSaves;
@@ -91,9 +95,10 @@ public class MainMenu : MonoBehaviour
     {
         for (int i = 0; i < m_PlayerSaves.Count; i++)
             m_PlayerSaves[i] = null;
-        foreach (Button saveFileButton in saveFileButtons)
+        for (int i = 0; i < saveFileButtons.Count; i++)
         {
-            saveFileButton.interactable = false;
+            saveFileButtons[i].interactable = false;
+            saveFileInfos[i].SetActive(false);
         }
         /*StartCoroutine(OverlayFadeOutCoroutine(action));*/
     }
@@ -104,7 +109,8 @@ public class MainMenu : MonoBehaviour
     /// <param name="index">Index of save file</param>
     public void StartLoadGame(int index)
     {
-        
+        m_PlayerSaves[index].loadData();
+        //todo: load scene
     }
 
     /// <summary>
@@ -145,6 +151,8 @@ public class MainMenu : MonoBehaviour
 
         saveFileButtons[saveFileNumber].interactable = true;
         saveFileAnimator[saveFileNumber].SetBool(HasSaveFile, true);
+        saveFileInfos[saveFileNumber].SetActive(true);
+        saveFileMajors[saveFileNumber].text = Player.majorToString[m_PlayerSaves[saveFileNumber]._major];
     }
     
     /// <summary>
