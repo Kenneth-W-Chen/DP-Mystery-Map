@@ -241,6 +241,40 @@ namespace PlayerInfo
         
         [NonSerialized]
         public string SaveFilePath;
+
+        /// <summary>
+        /// Loads the save file information from the disk to the object.
+        /// Does not load the data into the game state. Use <see cref="loadData"/> to load game data.
+        /// </summary>
+        /// <param name="saveFileName">Name of the save file.</param>
+        /// <param name="fullPath">Set to true if <see cref="saveFileName"/> is the full path of the save file. Defaults to only filename.</param>
+        /// <returns>A <see cref="PlayerSave"/> object if a save file was found. Returns null otherwise</returns>
+        public static PlayerSave GetSaveFile(string saveFileName, bool fullPath = false)
+        {
+            if (!fullPath)
+                saveFileName = Path.Combine(defaultSavePath, saveFileName);
+            if(!File.Exists(saveFileName))
+                return null;
+            PlayerSave s = new PlayerSave();
+            using (FileStream fs = new FileStream(saveFileName, FileMode.Open, FileAccess.Read))
+            {
+                object deserialized = bf.Deserialize(fs);
+                if (deserialized is not PlayerSave temp)
+                {
+                    return null;
+                }
+                else
+                {
+                    s._collectedItems = temp._collectedItems;
+                    s._facingDirection = temp._facingDirection;
+                    s._major = temp._major;
+                    s.position = temp.position;
+                    s.SaveFilePath = saveFileName;
+                }
+            }
+
+            return s;
+        }
         
         /// <summary>
         /// Saves player information to file
@@ -265,6 +299,7 @@ namespace PlayerInfo
         {
             if (!fullPath)
                 saveFileName = Path.Combine(defaultSavePath, saveFileName);
+            
             using (FileStream fs = new FileStream(saveFileName, FileMode.Open, FileAccess.Read))
             {
                 object deserialized = bf.Deserialize(fs);
