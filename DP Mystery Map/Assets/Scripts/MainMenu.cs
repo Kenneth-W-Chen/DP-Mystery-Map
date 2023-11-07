@@ -22,6 +22,8 @@ public class MainMenu : MonoBehaviour
 
     public float transitionSpeed = 0.1f;
     public float targetTime = 3f;
+
+    public GameObject loadGameContent; 
     public List<GameObject> saveFileGameObjects;
     public List<Button> saveFileButtons;
     public List<Animator> saveFileAnimator;
@@ -32,10 +34,13 @@ public class MainMenu : MonoBehaviour
     
     private static readonly Color Transparent = new Color(0, 0, 0, 0);
     
-    private List<PlayerSave> m_PlayerSaves;
+    private readonly List<PlayerSave> m_PlayerSaves = new List<PlayerSave>(3);
+    
+    private bool m_OverlayAnimRunning;
+    private float m_AnimationTime;
     
     private static readonly int HasSaveFile = Animator.StringToHash("HasSaveFile");
-
+    
     /// <summary>
     /// Shows the prompt for major selection.
     /// Called by New Game Button
@@ -101,6 +106,7 @@ public class MainMenu : MonoBehaviour
             saveFileInfos[i].SetActive(false);
         }
         /*StartCoroutine(OverlayFadeOutCoroutine(action));*/
+        loadGameContent.SetActive(false);
     }
 
     /// <summary>
@@ -118,6 +124,7 @@ public class MainMenu : MonoBehaviour
     /// </summary>
     private void LoadGameSetup()
     {
+        loadGameContent.SetActive(true);
         for (int i = 0; i < m_PlayerSaves.Count; i++)
         {
             if ((m_PlayerSaves[i] =
@@ -161,22 +168,25 @@ public class MainMenu : MonoBehaviour
     /// <param name="action">A function to be executed before or after the fade in is complete</param>
     /// <param name="param">Parameter to be passed to action</param>
     /// <param name="before">Whether to execute action before or after the fade in begins and finishes</param>
-    private IEnumerator OverlayFadeInCoroutine(Action<bool> action, bool param, bool before = false)
+    private IEnumerator OverlayFadeInCoroutine(Action<bool> action = null, bool param = false, bool before = false)
     {
-        if (before) action(param);
+        if (before && action is not null) action(param);
+        m_OverlayAnimRunning = true;
         // Play image transition
+        overlay.gameObject.SetActive(true);
         overlay.color = Transparent;
         var targetColor = Color.black;
-        var time = 0f;
+        m_AnimationTime = 0f;
         while (overlay.color != targetColor)
         {
-            time += Time.deltaTime * transitionSpeed;
+            m_AnimationTime += Time.deltaTime * transitionSpeed;
             /*i.color = new Color(i.color.r, i.color.g, i.color.b, i.color.a - (Time.deltaTime / time*speed));*/
-            overlay.color = Color.Lerp(overlay.color, targetColor, time/targetTime);
+            overlay.color = Color.Lerp(overlay.color, targetColor, m_AnimationTime/targetTime);
             yield return null;
         }
-
-        if (!before) action(param);
+        m_OverlayAnimRunning = false;
+        if (!before && action is not null) action(param);
+        
     }
 
     /// <summary>
@@ -185,18 +195,29 @@ public class MainMenu : MonoBehaviour
     /// <param name="action">A function to be executed before or after the fade in is complete</param>
     /// <param name="param">Parameter to be passed to action</param>
     /// <param name="before">Whether to execute action before or after the fade in begins and finishes</param>
-    private IEnumerator OverlayFadeOutCoroutine(Action<bool> action, bool param, bool before = false)
+    private IEnumerator OverlayFadeOutCoroutine(Action<bool> action = null, bool param = false, bool before = false)
     {
-        if (before) action(param);
+        if (before && action is not null) action(param);
+        m_OverlayAnimRunning = true;
         overlay.color = Color.black;
-        float time = 0f;
+        m_AnimationTime = 0f;
         while (overlay.color != Transparent)
         {
-            time += Time.deltaTime * transitionSpeed;
-            overlay.color = Color.Lerp(overlay.color, Transparent, time / targetTime);
+            m_AnimationTime += Time.deltaTime * transitionSpeed;
+            overlay.color = Color.Lerp(overlay.color, Transparent, m_AnimationTime / targetTime);
             yield return null;
         }
+        overlay.gameObject.SetActive(false);
+        m_OverlayAnimRunning = true;
+        if (!before && action is not null) action(param);
+    }
 
-        if (!before) action(param);
+    private void Update()
+    {
+        // skip animation
+        if (Input.GetKeyDown(KeyCode.Mouse0) && m_OverlayAnimRunning)
+        {
+            m_AnimationTime = targetTime;
+        }
     }
 }
