@@ -57,7 +57,7 @@ public class InteractivitySystem : MonoBehaviour
     /// <summary>
     /// Updates collision flags per walking towards and walking away
     /// </summary>
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Item"))
         {
@@ -76,7 +76,7 @@ public class InteractivitySystem : MonoBehaviour
         }
     }
 
-    private void OnCollisionExit2D(Collision2D collision)
+    private void OnTriggerExit2D(Collider2D collision)
     {
         if (itemCollision && collision.gameObject.CompareTag("Item"))
             itemCollision = false;
