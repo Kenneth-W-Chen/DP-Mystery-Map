@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
 using PlayerInfo;
 using TMPro;
 using UnityEngine;
@@ -31,10 +30,11 @@ public class MainMenu : MonoBehaviour
     public List<GameObject> saveFileInfos;
     public List<TMP_Text> saveFileMajors;
     public List<GameObject> saveFileCollectedItemsNone;
+    public GameObject loadMenuErrorMessage;
     
     private static readonly Color Transparent = new Color(0, 0, 0, 0);
     
-    private readonly List<PlayerSave> m_PlayerSaves = new List<PlayerSave>(3);
+    private readonly List<PlayerSave> m_PlayerSaves = new List<PlayerSave>(3){null};
     
     private bool m_OverlayAnimRunning;
     private float m_AnimationTime;
@@ -106,6 +106,7 @@ public class MainMenu : MonoBehaviour
             saveFileInfos[i].SetActive(false);
         }
         /*StartCoroutine(OverlayFadeOutCoroutine(action));*/
+        loadMenuErrorMessage.SetActive(false);
         loadGameContent.SetActive(false);
     }
 
@@ -125,11 +126,15 @@ public class MainMenu : MonoBehaviour
     private void LoadGameSetup()
     {
         loadGameContent.SetActive(true);
-        for (int i = 0; i < m_PlayerSaves.Count; i++)
+        for (int i = 0; i < 3; i++)
         {
             if ((m_PlayerSaves[i] =
-                    PlayerSave.GetSaveFile(Path.Combine(PlayerSave.defaultSavePath, (i+1).ToString()))) is null)
+                    PlayerSave.GetSaveFile(Path.Combine(PlayerSave.defaultSavePath, (i + 1).ToString()))) is null)
+            {
+                if(i==0)
+                    loadMenuErrorMessage.SetActive(true);
                 return;
+            }
             StartCoroutine(SaveOpenDelay(i, 0.5f * i));
         }
     }
