@@ -1056,7 +1056,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &663006414
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2044,6 +2044,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 801448984}
     m_Modifications:
+    - target: {fileID: 1128890041177738515, guid: 26defec913bca7b478574d0b1324170c, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1338870416}
+    - target: {fileID: 1128890041177738515, guid: 26defec913bca7b478574d0b1324170c, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: ExitGame
+      objectReference: {fileID: 0}
+    - target: {fileID: 1128890041177738515, guid: 26defec913bca7b478574d0b1324170c, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: MainMenu, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 1128890041177738515, guid: 26defec913bca7b478574d0b1324170c, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     - target: {fileID: 3288105351125694894, guid: 26defec913bca7b478574d0b1324170c, type: 3}
       propertyPath: m_text
       value: Exit
@@ -2165,7 +2181,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1194541328
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2683,6 +2699,7 @@ MonoBehaviour:
   - {fileID: 887483912}
   - {fileID: 1253470019}
   - {fileID: 1733211163}
+  loadMenuErrorMessage: {fileID: 663006413}
 --- !u!1 &1353893609
 GameObject:
   m_ObjectHideFlags: 0

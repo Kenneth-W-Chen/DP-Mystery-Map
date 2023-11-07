@@ -40,6 +40,16 @@ public class MainMenu : MonoBehaviour
     private float m_AnimationTime;
     
     private static readonly int HasSaveFile = Animator.StringToHash("HasSaveFile");
+
+    /// <summary>
+    /// Exits the application.
+    /// Called by Exit Button
+    /// </summary>
+    public void ExitGame()
+    {
+        // Consider adding a confirmation screen?
+        Application.Quit();
+    }
     
     /// <summary>
     /// Shows the prompt for major selection.
