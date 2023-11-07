@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
 using PlayerInfo;
 using TMPro;
 using UnityEngine;
@@ -20,9 +22,16 @@ public class MainMenu : MonoBehaviour
 
     public float transitionSpeed = 0.1f;
     public float targetTime = 3f;
-
+    public List<GameObject> saveFileGameObjects;
+    public List<Button> saveFileButtons;
+    public List<Animator> saveFileAnimator;
+    
     private static readonly Color Transparent = new Color(0, 0, 0, 0);
     
+    private List<PlayerSave> m_PlayerSaves;
+    
+    private static readonly int HasSaveFile = Animator.StringToHash("HasSaveFile");
+
     /// <summary>
     /// Shows the prompt for major selection.
     /// Called by New Game Button
@@ -48,6 +57,16 @@ public class MainMenu : MonoBehaviour
             _ => Player.major
         };
         //todo: set up new game 
+
+        string savePath = Path.Combine(PlayerSave.defaultSavePath,"1");
+        if (!File.Exists(savePath))
+            Player.SaveFilePath = String.Copy(savePath);
+        else if (!File.Exists((savePath = Path.Combine(PlayerSave.defaultSavePath, "2"))))
+            Player.SaveFilePath = String.Copy(savePath);
+        else if (!File.Exists((savePath = Path.Combine(PlayerSave.defaultSavePath, "3"))))
+            Player.SaveFilePath = String.Copy(savePath);
+        // todo: prompt player where they want to save the file
+        else Player.SaveFilePath = Path.Combine(PlayerSave.defaultSavePath, "999");
     }
 
     /// <summary>
@@ -63,11 +82,71 @@ public class MainMenu : MonoBehaviour
     /// Shows list of game saves.
     /// Called by Load Game Button
     /// </summary>
-    public void LoadGame()
+    public void LoadGameMenu()
+    {
+        LoadGameSetup();
+    }
+
+    public void Back_LoadGame()
+    {
+        for (int i = 0; i < m_PlayerSaves.Count; i++)
+            m_PlayerSaves[i] = null;
+        foreach (Button saveFileButton in saveFileButtons)
+        {
+            saveFileButton.interactable = false;
+        }
+        /*StartCoroutine(OverlayFadeOutCoroutine(action));*/
+    }
+
+    /// <summary>
+    /// Loads the game from a save file.
+    /// </summary>
+    /// <param name="index">Index of save file</param>
+    public void StartLoadGame(int index)
     {
         
     }
 
+    /// <summary>
+    /// Finds save files and starts <see cref="SaveOpenDelay"/> coroutine for save files that exist
+    /// </summary>
+    private void LoadGameSetup()
+    {
+        for (int i = 0; i < m_PlayerSaves.Count; i++)
+        {
+            if ((m_PlayerSaves[i] =
+                    PlayerSave.GetSaveFile(Path.Combine(PlayerSave.defaultSavePath, (i+1).ToString()))) is null)
+                return;
+            StartCoroutine(SaveOpenDelay(i, 0.5f * i));
+        }
+    }
+
+    /// <summary>
+    /// function for unit testing; attach to buttons
+    /// </summary>
+    public void test()
+    {
+       
+    }
+    
+    /// <summary>
+    /// Delays playing the animation for the loading dock open animation
+    /// </summary>
+    /// <param name="saveFileNumber">Number of the save file to open. Based on array indexing</param>
+    /// <param name="delay">Time delay in seconds before opening.</param>
+    private IEnumerator SaveOpenDelay(int saveFileNumber, float delay = 0f)
+    {
+        float time = 0f;
+        while (time < delay)
+        {
+            yield return null;
+            time += Time.deltaTime;
+        }
+
+        saveFileButtons[saveFileNumber].interactable = true;
+        saveFileAnimator[saveFileNumber].SetBool(HasSaveFile, true);
+    }
+    
     /// <summary>
     /// Coroutine to have a fancy fade-in transition
     /// </summary>
