@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -71,6 +72,15 @@ namespace PlayerInfo
     public static class Player
     {
         public const int MaxHealth = 100;
+
+        public static readonly Dictionary<Major, string> majorToString = new Dictionary<Major, string>()
+        {
+            { Major.None, "None" },
+            { Major.ComputerScience, "Computer Science" },
+            { Major.ComputerEngineering, "Computer Engineering" },
+            { Major.ElectricalEngineering, "Electrical Engineering" },
+            { Major.MechanicalEngineering, "Mechanical Engineering" }
+        };
         
         public static KeyCode MoveUpKey = KeyCode.W;
         public static KeyCode MoveDownKey = KeyCode.S;
@@ -79,6 +89,8 @@ namespace PlayerInfo
 
         public static string SaveFilePath = $"{Path.Combine(PlayerSave.defaultSavePath, "save1")}";
 
+        
+        
         private static readonly GameObject PlayerPrefab = (GameObject) UnityEngine.Resources.Load("prefabs/player", typeof(GameObject));
         /// <summary>
         /// The items the player has collected
