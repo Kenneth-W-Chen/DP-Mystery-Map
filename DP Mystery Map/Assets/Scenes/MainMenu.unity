@@ -2891,12 +2891,12 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '<b>Discovery Park</b>
+  m_text: 'Discovery Park
 
     <size="80%"><i>Mystery Map</i>'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 6be2dda37f1860644bdcbe3a680fd2ee, type: 2}
-  m_sharedMaterial: {fileID: -514452811239917394, guid: 6be2dda37f1860644bdcbe3a680fd2ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: b7bdb490ab7fb8740b751d2b99de536b, type: 2}
+  m_sharedMaterial: {fileID: 5845459362549037063, guid: b7bdb490ab7fb8740b751d2b99de536b, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
