@@ -59,4 +59,4 @@ Unity will initialize the project for you.
 * Scripts and code are located in `DP-Mystery-Map/DP-Mystery-Map/Assets/Scripts/`
 * Scenes are located in `DP-Mystery-Map/DP-Mystery-Map/Assets/Scenes/`
 * Sprites and images are located in `DP-Mystery-Map/DP-Mystery-Map/Assets/Sprites/`
-* Prefabs are located in `DP-Mystery-Map/DP-Mystery-Map/Assets/Prefabs/`
+* Prefabs are located in `DP-Mystery-Map/DP-Mystery-Map/Assets/Respurces/Prefabs/`

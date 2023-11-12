@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 
 namespace PlayerInfo
@@ -18,7 +22,7 @@ namespace PlayerInfo
     /// <summary>
     /// Bitflag for items
     /// </summary>
-    [Flags]
+    [Flags, Serializable]
     public enum Item:short
     {
        None = 0,
@@ -31,6 +35,18 @@ namespace PlayerInfo
        All = 63
     }
 
+    /// <summary>
+    /// Enum describing which major the player has
+    /// </summary>
+    public enum Major:short
+    {
+        None = 0,
+        ComputerEngineering = 1,
+        ComputerScience = 2,
+        ElectricalEngineering = 3,
+        MechanicalEngineering = 4
+    }
+    
     /// <summary>
     /// Event handler delegate that is fired when the player collects all items.
     /// </summary>
@@ -56,12 +72,26 @@ namespace PlayerInfo
     public static class Player
     {
         public const int MaxHealth = 100;
+
+        public static readonly Dictionary<Major, string> majorToString = new Dictionary<Major, string>()
+        {
+            { Major.None, "None" },
+            { Major.ComputerScience, "Computer Science" },
+            { Major.ComputerEngineering, "Computer Engineering" },
+            { Major.ElectricalEngineering, "Electrical Engineering" },
+            { Major.MechanicalEngineering, "Mechanical Engineering" }
+        };
         
         public static KeyCode MoveUpKey = KeyCode.W;
         public static KeyCode MoveDownKey = KeyCode.S;
         public static KeyCode MoveLeftKey = KeyCode.A;
         public static KeyCode MoveRightKey = KeyCode.D;
 
+        public static string SaveFilePath = $"{Path.Combine(PlayerSave.defaultSavePath, "save1")}";
+
+        
+        
+        private static readonly GameObject PlayerPrefab = (GameObject) UnityEngine.Resources.Load("prefabs/player", typeof(GameObject));
         /// <summary>
         /// The items the player has collected
         /// </summary>
@@ -72,6 +102,11 @@ namespace PlayerInfo
         /// </summary>
         private static Direction _facingDirection = Direction.Up;
 
+        /// <summary>
+        /// The player's major
+        /// </summary>
+        private static Major _major = Major.None;
+        
         /// <summary>
         /// Player health
         /// </summary>
@@ -145,6 +180,12 @@ namespace PlayerInfo
             }
         }
 
+        public static Major major
+        {
+            get=>_major;
+            set => _major = value;
+        }
+
         /// <summary>
         /// Resets control bindings to the defaults.
         /// </summary>
@@ -165,6 +206,159 @@ namespace PlayerInfo
             _facingDirection = Direction.Up;
             _health = MaxHealth;
         }
+
+        public static void loadData(PlayerSave save)
+        {
+            SaveFilePath = save.SaveFilePath;
+            _collectedItems = save._collectedItems;
+            _facingDirection = save._facingDirection;
+            _major = save._major;
+            _health = MaxHealth;
+            if (PlayerController.playerControllerReference is not null)
+                PlayerController.playerControllerReference.transform.position = save.position;
+            else
+            {
+                UnityEngine.Object.Instantiate(PlayerPrefab);
+            }
+        }
     }
     
+    /// <summary>
+    /// This class holds information for player info to be serialized.
+    /// For class member documentation, see <see cref="Player"/> members of same names
+    /// </summary>
+    [System.Serializable]
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    public class PlayerSave
+    {
+        /// <summary>
+        /// The default path for save game files
+        /// </summary>
+        public static readonly string defaultSavePath = $"{Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),"DP-Map-Saves")}";
+        /// <summary>
+        /// BinaryFormatter used for serializing data
+        /// </summary>
+        public static BinaryFormatter bf = new BinaryFormatter();
+        
+        /*public KeyCode MoveUpKey;
+        public KeyCode MoveDownKey;
+        public KeyCode MoveLeftKey;
+        public KeyCode MoveRightKey;*/
+        
+        public Item _collectedItems;
+        public Direction _facingDirection;
+        public Major _major;
+        
+        public Vector2 position;
+        
+        [NonSerialized]
+        public string SaveFilePath;
+
+        /// <summary>
+        /// Loads the save file information from the disk to the object.
+        /// Does not load the data into the game state. Use <see cref="loadData"/> to load game data.
+        /// </summary>
+        /// <param name="saveFileName">Name of the save file.</param>
+        /// <param name="fullPath">Set to true if <see cref="saveFileName"/> is the full path of the save file. Defaults to only filename.</param>
+        /// <returns>A <see cref="PlayerSave"/> object if a save file was found. Returns null otherwise</returns>
+        public static PlayerSave GetSaveFile(string saveFileName, bool fullPath = false)
+        {
+            if (!fullPath)
+                saveFileName = Path.Combine(defaultSavePath, saveFileName);
+            if(!File.Exists(saveFileName))
+                return null;
+            PlayerSave s = new PlayerSave();
+            using (FileStream fs = new FileStream(saveFileName, FileMode.Open, FileAccess.Read))
+            {
+                object deserialized = bf.Deserialize(fs);
+                if (deserialized is not PlayerSave temp)
+                {
+                    return null;
+                }
+                else
+                {
+                    s._collectedItems = temp._collectedItems;
+                    s._facingDirection = temp._facingDirection;
+                    s._major = temp._major;
+                    s.position = temp.position;
+                    s.SaveFilePath = saveFileName;
+                }
+            }
+
+            return s;
+        }
+        
+        /// <summary>
+        /// Saves player information to file
+        /// </summary>
+        /// <exception cref="Exception">No data able to be saved</exception>
+        public void Save()
+        {
+            // consider removing, the save button should not be accessible outside of the game
+            if (PlayerController.playerControllerReference is null)
+                throw new Exception("No player object instantiated.");
+            SaveData();
+            SerializeData();
+        }
+        
+        /// <summary>
+        /// Loads the save file information from the disk to the object.
+        /// Does not load the data into the game state. Use <see cref="loadData"/> to load game data.
+        /// </summary>
+        /// <param name="saveFileName">Name of the save file.</param>
+        /// <param name="fullPath">Set to true if <see cref="saveFileName"/> is the full path of the save file. Defaults to only filename.</param>
+        public void loadFile(string saveFileName, bool fullPath = false)
+        {
+            if (!fullPath)
+                saveFileName = Path.Combine(defaultSavePath, saveFileName);
+            
+            using (FileStream fs = new FileStream(saveFileName, FileMode.Open, FileAccess.Read))
+            {
+                object deserialized = bf.Deserialize(fs);
+                if (deserialized is not PlayerSave temp)
+                {
+                    throw new Exception("Save file read exception");
+                }
+                else
+                {
+                    this._collectedItems = temp._collectedItems;
+                    this._facingDirection = temp._facingDirection;
+                    this._major = temp._major;
+                    this.position = temp.position;
+                    this.SaveFilePath = saveFileName;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Loads the objects fields into <see cref="Player"/>'s static fields
+        /// </summary>
+        public void loadData()
+        {
+            Player.loadData(this);
+        }
+
+        /// <summary>
+        /// Saves current data to the object
+        /// </summary>
+        private void SaveData()
+        {
+            /*MoveUpKey = Player.MoveUpKey;
+            MoveDownKey = Player.MoveDownKey;
+            MoveLeftKey = Player.MoveDownKey;
+            MoveRightKey = Player.MoveRightKey;*/
+            SaveFilePath = Player.SaveFilePath;
+            _collectedItems = Player.collectedItems;
+            _facingDirection = Player.FacingDirection;
+            position = (Vector2) PlayerController.playerControllerReference.transform.position;
+        }
+
+        private void SerializeData()
+        {
+            using (FileStream fs = new FileStream(SaveFilePath, FileMode.Create, FileAccess.Write))
+            {
+                bf.Serialize(fs, this);
+            }
+        }
+    }
 }
