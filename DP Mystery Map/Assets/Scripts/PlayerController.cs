@@ -125,6 +125,8 @@ public class PlayerController : MonoBehaviour
         }
 
         playerControllerReference = this;
+        DontDestroyOnLoad(gameObject);
+        
         // Initialize movement functions
         _movePlayerUpdate = GridMoveUpdate;
         _movePlayerFixedUpdate = GridMoveFixedUpdate;
