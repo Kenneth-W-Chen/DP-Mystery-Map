@@ -8,19 +8,25 @@ using UnityEngine.SceneManagement;
 public class Stairs : MonoBehaviour
 {
    public int stairIndex;
-
+   public bool _isFloorTwo;
+   
    private PlayerPosition _position;
 
    private void Start()
    {
-      _position = StageData.FloorOneToFloorTwoPos[stairIndex];
+      _position = SceneManager.GetActiveScene().name == "FloorOne"? StageData.FloorOneToFloorTwoPos[stairIndex]: StageData.FloorTwoToFloorOnePos[stairIndex];
    }
-
+   
    private void OnTriggerEnter2D(Collider2D col)
    {
-      if (!col.CompareTag("Player")) return;
+      if (!col.gameObject.CompareTag("Player"))
+      {
+         return;
+      }
+      LoadingOverlay.Reference.Show();
       PlayerController.playerControllerReference.transform.position = _position.Position;
       Player.FacingDirection = _position.direction;
-      SceneManager.LoadScene("FloorTwo");
+      PlayerController.playerControllerReference.StopWalking();
+      SceneManager.LoadScene(_isFloorTwo? "FloorOne":"FloorTwo");
    }
 }
