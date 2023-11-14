@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using PlayerInfo;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// This script includes movement and interact colliders.
@@ -87,6 +88,7 @@ public class PlayerController : MonoBehaviour
     private float _leftKeyHeldStartTime;
     private float _rightKeyHeldStartTime;
     private Dictionary<Direction, KeyCode> _directionToKeyCode;
+    private bool _stopWalking = false;
 
     public bool IsGridMovement
     {
@@ -109,6 +111,29 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
+
+    public void StopWalking(bool waitForAnimFinish = false)
+    {
+        if (_isGridMovement)
+        {
+            if (waitForAnimFinish)
+            {
+                _stopWalking = true;
+            }
+            else
+            {
+                WalkingGrid = false;
+                _walkOn = false;
+                _walkOnce = false;
+                _walkStartTime = Time.time;
+                _startPos = _endPos = transform.position;
+            }
+        }
+        else
+        {
+            
+        }
+    }
     
     public void toggleMovement()
     {
@@ -125,6 +150,10 @@ public class PlayerController : MonoBehaviour
         }
 
         playerControllerReference = this;
+        DontDestroyOnLoad(gameObject);
+
+        SceneManager.sceneLoaded += OnLevelLoad;
+        
         // Initialize movement functions
         _movePlayerUpdate = GridMoveUpdate;
         _movePlayerFixedUpdate = GridMoveFixedUpdate;
@@ -213,6 +242,14 @@ public class PlayerController : MonoBehaviour
             //else we check to see if enough time has passed to consider the button held down
             else if (timeSincePress > KeyHeldMinDuration)
             {
+                if (_stopWalking)
+                {
+                    _stopWalking = false;
+                    UpdateMovementVals();
+                    _walkOnce = false;
+                    _walkOn = false;
+                    return;
+                }
                 /*Debug.Log("Turning on walk");*/
                 _walkOn = true;
                 Player.FacingDirection = _walkDirection;
@@ -363,6 +400,11 @@ public class PlayerController : MonoBehaviour
             Direction.Right => _startPos + GridStepSize * Vector2.right,
             _ => _endPos
         };
+    }
+
+    private void OnLevelLoad(Scene scene, LoadSceneMode mode)
+    {
+        UpdateMovementVals();
     }
 
     // Subscribes functions to events

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using Unity.VisualScripting;
 using UnityEngine;
+using Object = System.Object;
 
 namespace PlayerInfo
 {
@@ -211,11 +213,11 @@ namespace PlayerInfo
         {
             SaveFilePath = save.SaveFilePath;
             _collectedItems = save._collectedItems;
-            _facingDirection = save._facingDirection;
+            _facingDirection = save._position.direction;
             _major = save._major;
             _health = MaxHealth;
             if (PlayerController.playerControllerReference is not null)
-                PlayerController.playerControllerReference.transform.position = save.position;
+                PlayerController.playerControllerReference.transform.position = save._position.Position;
             else
             {
                 UnityEngine.Object.Instantiate(PlayerPrefab);
@@ -246,10 +248,9 @@ namespace PlayerInfo
         public KeyCode MoveRightKey;*/
         
         public Item _collectedItems;
-        public Direction _facingDirection;
         public Major _major;
+        public PlayerPosition _position;
         
-        public Vector2 position;
         
         [NonSerialized]
         public string SaveFilePath;
@@ -278,9 +279,8 @@ namespace PlayerInfo
                 else
                 {
                     s._collectedItems = temp._collectedItems;
-                    s._facingDirection = temp._facingDirection;
+                    s._position = new PlayerPosition(ref temp._position);
                     s._major = temp._major;
-                    s.position = temp.position;
                     s.SaveFilePath = saveFileName;
                 }
             }
@@ -322,9 +322,8 @@ namespace PlayerInfo
                 else
                 {
                     this._collectedItems = temp._collectedItems;
-                    this._facingDirection = temp._facingDirection;
+                    this._position = new PlayerPosition(ref temp._position);
                     this._major = temp._major;
-                    this.position = temp.position;
                     this.SaveFilePath = saveFileName;
                 }
             }
@@ -349,8 +348,7 @@ namespace PlayerInfo
             MoveRightKey = Player.MoveRightKey;*/
             SaveFilePath = Player.SaveFilePath;
             _collectedItems = Player.collectedItems;
-            _facingDirection = Player.FacingDirection;
-            position = (Vector2) PlayerController.playerControllerReference.transform.position;
+            _position = new PlayerPosition(PlayerController.playerControllerReference.transform.position, Player.FacingDirection);
         }
 
         private void SerializeData()
@@ -359,6 +357,33 @@ namespace PlayerInfo
             {
                 bf.Serialize(fs, this);
             }
+        }
+    }
+
+    public struct PlayerPosition
+    {
+        public Vector2 Position;
+        public Direction direction;
+
+        /// <summary>
+        /// Parameter constructor
+        /// </summary>
+        /// <param name="position">The player's position relative to parent</param>
+        /// <param name="direction">The direction the player is facing</param>
+        public PlayerPosition(Vector2 position, Direction direction)
+        {
+            this.Position = new Vector2(position.x, position.y);
+            this.direction = direction;
+        }
+
+        /// <summary>
+        /// Copy constructor
+        /// </summary>
+        /// <param name="source">The source PlayerPosition object to copy</param>
+        public PlayerPosition(ref PlayerPosition source)
+        {
+            this.Position = source.Position;
+            this.direction = source.direction;
         }
     }
 }
