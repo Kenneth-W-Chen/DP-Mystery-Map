@@ -1,15 +1,21 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class InteractivitySystem : MonoBehaviour
 {
+    public static InteractivitySystem reference;
+    
     /// <summary>
     /// Player Based Interaction Components
     /// </summary>
     public KeyCode interactKey = KeyCode.P;
     public Collider2D interactCollider;
 
+    [NonSerialized] public bool canInteract = true;
+    
     /// <summary>
     /// Detection/Flags for Interaction
     /// </summary>
@@ -18,19 +24,37 @@ public class InteractivitySystem : MonoBehaviour
     private GameObject itemObject = null;
     private GameObject npcObject = null;
 
+    private void Start()
+    {
+        if (reference is not null)
+        {
+            Destroy(this);
+            return;
+        }
+
+        reference = this;
+    }
+
     //Set update to constantly check for player input
     void Update()
     {
-        if (Input.GetKeyUp(interactKey))
+        if (Input.GetKeyUp(interactKey) && canInteract)
         {
             interactionType();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (reference == this)
+        {
+            reference = null;
         }
     }
 
     // Based on the situation, the function will handle what type of interaction to carry out
     public void interactionType()
     {
-
         if (itemCollision)
             itemInteraction();
         else if (npcCollision)
