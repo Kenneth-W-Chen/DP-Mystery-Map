@@ -57,6 +57,11 @@ public class PlayerController : MonoBehaviour
     /// Currently untracked.
     /// </summary>
     [NonSerialized] public ulong StepsTaken = 0;
+
+    /// <summary>
+    /// Whether the player is able to walk. This will not stop any executing movement (i.e., grid movement)
+    /// </summary>
+    [NonSerialized] public bool canWalk = true;
     
     private MovePlayerUpdate _movePlayerUpdate;
     private MovePlayerFixedUpdate _movePlayerFixedUpdate;
@@ -201,6 +206,7 @@ public class PlayerController : MonoBehaviour
     
     private void GridMoveUpdate()
     {
+        if (!canWalk) return;
         //check if key was pressed down
         if (_keyHeld)
         {
@@ -270,6 +276,8 @@ public class PlayerController : MonoBehaviour
 
     private void FreeMoveFixedUpdate()
     {
+        if (!canWalk)
+            return;
         _xMovement = 0;
         _yMovement = 0;
         if (Input.GetKey(Player.MoveUpKey)) _yMovement += 1f;
