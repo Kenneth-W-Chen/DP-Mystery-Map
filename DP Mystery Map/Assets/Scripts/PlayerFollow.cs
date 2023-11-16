@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using PlayerInfo;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
-public class PlayerFollow : MonoBehaviour
+public class PlayerFollow : GameplayScript
 {
 
     public GameObject playerObject;
@@ -11,16 +13,17 @@ public class PlayerFollow : MonoBehaviour
     private static PlayerFollow _reference;
 
     private float _zPosition;
-    private void Start()
+    
+    protected override void Start()
     {
         if(_reference is not null)
         {
             Destroy(this.gameObject);
             return;
         }
-
+        base.Start();
+        
         _reference = this;
-        DontDestroyOnLoad(this.gameObject);
         _zPosition = transform.position.z;
     }
 

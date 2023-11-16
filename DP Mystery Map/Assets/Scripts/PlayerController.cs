@@ -2,13 +2,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using PlayerInfo;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>
 /// This script includes movement and interact colliders.
 /// </summary>
-public class PlayerController : MonoBehaviour
+public class PlayerController : GameplayScript
 {
     public static PlayerController playerControllerReference;
     
@@ -146,18 +147,16 @@ public class PlayerController : MonoBehaviour
     }
 
     // Start is called before the first frame update
-    void Start()
+    protected override void Start()
     {
         if (playerControllerReference is not null)
         {
             Destroy(this.gameObject);
             return;
         }
-
+        base.Start();
+        
         playerControllerReference = this;
-        DontDestroyOnLoad(gameObject);
-
-        SceneManager.sceneLoaded += OnLevelLoad;
         
         // Initialize movement functions
         _movePlayerUpdate = GridMoveUpdate;
@@ -186,6 +185,14 @@ public class PlayerController : MonoBehaviour
     {
         _movePlayerUpdate();
     }
+    
+    
+    protected override void OnLevelLoad(Scene scene, LoadSceneMode mode)
+    {
+        base.OnLevelLoad(scene, mode);
+        UpdateMovementVals();
+    }
+
 
     private void FixedUpdate()
     {
@@ -412,11 +419,6 @@ public class PlayerController : MonoBehaviour
             Direction.Right => _startPos + GridStepSize * Vector2.right,
             _ => _endPos
         };
-    }
-
-    private void OnLevelLoad(Scene scene, LoadSceneMode mode)
-    {
-        UpdateMovementVals();
     }
 
     // Subscribes functions to events
