@@ -39,7 +39,7 @@ public class InteractivitySystem : MonoBehaviour
     //Set update to constantly check for player input
     void Update()
     {
-        if (Input.GetKeyUp(Player.InteractKey) && canInteract)
+        if (Input.GetKeyUp(Player.InteractKey) && canInteract && !PlayerController.playerControllerReference.WalkingGrid)
         {
             interactionType();
         }
