@@ -223,8 +223,12 @@ public class PlayerController : MonoBehaviour
                 {
                     if (Player.FacingDirection == _walkDirection)
                     {
-                        UpdateMovementVals();
-                        _walkOnce = true;
+                        // prevent the _endPos value from being updated in the middle of a step
+                        if(!WalkingGrid)
+                        {
+                            UpdateMovementVals();
+                            _walkOnce = true;
+                        }
                     }
                     else
                     {
@@ -254,7 +258,7 @@ public class PlayerController : MonoBehaviour
                 _walkOn = true;
                 Player.FacingDirection = _walkDirection;
             }
-
+            
             CheckKeys();
         }
         //else check for key being pressed down
