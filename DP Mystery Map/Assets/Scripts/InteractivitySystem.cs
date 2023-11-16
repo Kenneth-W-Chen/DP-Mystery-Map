@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using PlayerInfo;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -11,7 +12,7 @@ public class InteractivitySystem : MonoBehaviour
     /// <summary>
     /// Player Based Interaction Components
     /// </summary>
-    public KeyCode interactKey = KeyCode.P;
+    
     public Collider2D interactCollider;
 
     [NonSerialized] public bool canInteract = true;
@@ -38,7 +39,7 @@ public class InteractivitySystem : MonoBehaviour
     //Set update to constantly check for player input
     void Update()
     {
-        if (Input.GetKeyUp(interactKey) && canInteract)
+        if (Input.GetKeyUp(Player.InteractKey) && canInteract)
         {
             interactionType();
         }
