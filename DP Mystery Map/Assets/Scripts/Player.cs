@@ -88,6 +88,7 @@ namespace PlayerInfo
         public static KeyCode MoveDownKey = KeyCode.S;
         public static KeyCode MoveLeftKey = KeyCode.A;
         public static KeyCode MoveRightKey = KeyCode.D;
+        public static KeyCode PauseKey = KeyCode.Escape;
 
         public static string SaveFilePath = $"{Path.Combine(PlayerSave.defaultSavePath, "save1")}";
 
