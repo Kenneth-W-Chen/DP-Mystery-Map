@@ -5,7 +5,7 @@ using PlayerInfo;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class PauseMenu : GameplayScript
+public class PauseMenu : MonoBehaviour
 {
     public static PauseMenu reference;
     // The pause menu content
@@ -45,7 +45,7 @@ public class PauseMenu : GameplayScript
         ExitToMainMenu();
     }
 
-    protected override void Start()
+    private void Start()
     {
         if(reference is not null)
         {
@@ -53,7 +53,6 @@ public class PauseMenu : GameplayScript
             return;
         }
         reference = this;
-        base.Start();
     }
 
     void Update()

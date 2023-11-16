@@ -5,7 +5,7 @@ using PlayerInfo;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class InteractivitySystem : GameplayScript
+public class InteractivitySystem : MonoBehaviour
 {
     public static InteractivitySystem reference;
     
@@ -25,14 +25,14 @@ public class InteractivitySystem : GameplayScript
     private GameObject itemObject = null;
     private GameObject npcObject = null;
 
-    protected override void Start()
+    void Start()
     {
         if (reference is not null)
         {
             Destroy(this);
             return;
         }
-        base.Start();
+        
         reference = this;
     }
 
