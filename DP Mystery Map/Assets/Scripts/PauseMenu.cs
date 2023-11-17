@@ -17,7 +17,8 @@ public class PauseMenu : MonoBehaviour
     public void ResumeGame()
     {
         HidePauseMenu();
-        PlayerController.playerControllerReference.canWalk = InteractivitySystem.reference.canInteract = true;
+        PlayerController.playerControllerReference.WalkBlocked &= ~PlayerController.WalkBlockedFlags.Paused; 
+        InteractivitySystem.reference.canInteract = true;
         
     }
     
@@ -27,7 +28,8 @@ public class PauseMenu : MonoBehaviour
     public void PauseGame()
     {
         ShowPauseMenu();
-        PlayerController.playerControllerReference.canWalk = InteractivitySystem.reference.canInteract = false;
+        PlayerController.playerControllerReference.WalkBlocked |= PlayerController.WalkBlockedFlags.Paused;
+        InteractivitySystem.reference.canInteract = false;
     }
 
     /// <summary>
