@@ -84,6 +84,8 @@ public class InteractivitySystem : MonoBehaviour
     /// </summary>
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        Debug.Log("test");
+        PlayerController.playerControllerReference.WalkBlocked |= PlayerController.WalkBlockedFlags.DirectionBlocked;
         if (collision.gameObject.CompareTag("Item"))
         {
             itemCollision = true;
@@ -103,6 +105,8 @@ public class InteractivitySystem : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
+        Debug.Log("test2");
+        PlayerController.playerControllerReference.WalkBlocked &= ~PlayerController.WalkBlockedFlags.DirectionBlocked;
         if (itemCollision && collision.gameObject.CompareTag("Item"))
             itemCollision = false;
         else if (npcCollision && collision.gameObject.CompareTag("NPC"))
