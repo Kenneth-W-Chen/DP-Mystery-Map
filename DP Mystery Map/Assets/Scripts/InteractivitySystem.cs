@@ -7,8 +7,10 @@ public class InteractivitySystem : MonoBehaviour
     /// <summary>
     /// Player Based Interaction Components
     /// </summary>
-    public KeyCode interactKey = KeyCode.P;
+    public static KeyCode interactKey = KeyCode.P;
     public Collider2D interactCollider;
+
+    public TextAsset inkJson;
 
     /// <summary>
     /// Detection/Flags for Interaction
@@ -39,10 +41,11 @@ public class InteractivitySystem : MonoBehaviour
             Debug.Log("There is nothing here!");
     }
 
+
     //Logic for NPC interaction
     void npcInteraction()
     {
-        Debug.Log("Interacting with an NPC.");
+        DialogueManager.instance.EnterDialogueMode(inkJson);
         npcObject = null;
     }
 
