@@ -12,14 +12,42 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public class PlayerController : GameplayScript
 {
+    /// <summary>
+    /// Flags for what is preventing movement and/or turning
+    /// </summary>
     [Flags]
     public enum WalkBlockedFlags : short
     {
+        /// <summary>
+        /// The player's movement is unrestricted
+        /// </summary>
         CanWalk = 0,
+
+        /// <summary>
+        /// The player can't move due to the pause menu being opened
+        /// </summary>
         Paused = 1,
+
+        /// <summary>
+        /// The player can't walk due to an object being in front of them
+        /// </summary>
         DirectionBlocked = 2,
+
+        /// <summary>
+        /// The player can't move because they are interacting with something
+        /// </summary>
         Interacting = 4,
+
+        /// <summary>
+        /// Flag combination indicating that the player can't walk or change facing direction
+        /// Do not set something to this value. 
+        /// </summary>
         CantMove = Paused | Interacting,
+
+        /// <summary>
+        /// Flag combination indicating that the player can't walk. The player can still change facing direction.
+        /// Do not set something to this value.
+        /// </summary>
         CantWalk = DirectionBlocked
     }
 
@@ -339,28 +367,13 @@ public class PlayerController : GameplayScript
 
             return;
         }
+
         playerRigidbody.MovePosition(Vector2.Lerp(_startPos, _endPos,
             (Time.time - _walkStartTime) / GridWalkDuration));
         if (playerRigidbody.position == _endPos)
-        {
-            Debug.Log("Position == endPos");
             WalkingGrid = false;
-        }
-        else
-        {
-            Debug.Log($"Position != endpos\n{playerRigidbody.position}\n{_endPos}");
-        }
 
         _walkOnce = false;
-        /*if(_walkOn)
-        // sets the player's position and then checks if they're at the end position
-        {
-            rigidBody.MovePosition(Vector2.Lerp(_startPos, _endPos, (Time.time - _startTime) / WalkDuration));
-            if (rigidBody.position == _endPos)
-            {
-                _walkOn = false;
-            }
-        }*/
     }
 
     void UpdateColliders(Direction oldDirection, Direction newDirection)
