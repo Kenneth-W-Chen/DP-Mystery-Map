@@ -76,7 +76,7 @@ public class MainMenu : MonoBehaviour
             _ => Player.major
         };
         //todo: set up new game 
-
+        LoadGamePlayObjects();
         string savePath = Path.Combine(PlayerSave.defaultSavePath,"1");
         if (!File.Exists(savePath))
             Player.SaveFilePath = String.Copy(savePath);
@@ -234,5 +234,12 @@ public class MainMenu : MonoBehaviour
         {
             m_AnimationTime = targetTime;
         }
+    }
+
+    public void LoadGamePlayObjects()
+    {
+        Instantiate(Resources.Load<GameObject>("Prefabs/Gameplay Canvas"));
+        Instantiate(Resources.Load<GameObject>("Prefabs/Player"));
+        Instantiate(Resources.Load<GameObject>("Prefabs/Game Camera"));
     }
 }

@@ -1,15 +1,22 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using PlayerInfo;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class InteractivitySystem : MonoBehaviour
 {
+    public static InteractivitySystem reference;
+    
     /// <summary>
     /// Player Based Interaction Components
     /// </summary>
-    public KeyCode interactKey = KeyCode.P;
+    
     public Collider2D interactCollider;
 
+    [NonSerialized] public bool canInteract = true;
+    
     /// <summary>
     /// Detection/Flags for Interaction
     /// </summary>
@@ -18,19 +25,37 @@ public class InteractivitySystem : MonoBehaviour
     private GameObject itemObject = null;
     private GameObject npcObject = null;
 
+    void Start()
+    {
+        if (reference is not null)
+        {
+            Destroy(this);
+            return;
+        }
+        
+        reference = this;
+    }
+
     //Set update to constantly check for player input
     void Update()
     {
-        if (Input.GetKeyUp(interactKey))
+        if (Input.GetKeyUp(Player.InteractKey) && canInteract && !PlayerController.playerControllerReference.WalkingGrid)
         {
             interactionType();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (reference == this)
+        {
+            reference = null;
         }
     }
 
     // Based on the situation, the function will handle what type of interaction to carry out
     public void interactionType()
     {
-
         if (itemCollision)
             itemInteraction();
         else if (npcCollision)
@@ -59,6 +84,8 @@ public class InteractivitySystem : MonoBehaviour
     /// </summary>
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        Debug.Log("test");
+        PlayerController.playerControllerReference.WalkBlocked |= PlayerController.WalkBlockedFlags.DirectionBlocked;
         if (collision.gameObject.CompareTag("Item"))
         {
             itemCollision = true;
@@ -78,6 +105,8 @@ public class InteractivitySystem : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
+        Debug.Log("test2");
+        PlayerController.playerControllerReference.WalkBlocked &= ~PlayerController.WalkBlockedFlags.DirectionBlocked;
         if (itemCollision && collision.gameObject.CompareTag("Item"))
             itemCollision = false;
         else if (npcCollision && collision.gameObject.CompareTag("NPC"))

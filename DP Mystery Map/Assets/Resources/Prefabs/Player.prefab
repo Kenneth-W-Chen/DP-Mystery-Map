@@ -161,7 +161,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.5, y: 0.5}
   m_EdgeRadius: 0
 --- !u!114 &4701941950481292227
 MonoBehaviour:
@@ -175,7 +175,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f69fa673d989074096f24a8e5f4f1c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  interactKey: 112
   interactCollider: {fileID: 6137049103917857567}
 --- !u!1 &7872879371254255490
 GameObject:
@@ -308,7 +307,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.9, y: 0.9}
   m_EdgeRadius: 0
 --- !u!50 &1374854384162403868
 Rigidbody2D:
