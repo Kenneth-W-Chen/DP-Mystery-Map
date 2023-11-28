@@ -66,8 +66,8 @@ namespace PlayerInfo
         /// The items the player has collected
         /// </summary>
         private static Item _collectedItems = Item.None;
-        
-        /// <summary>
+
+           /// <summary>
         /// The direction the player is facing
         /// </summary>
         private static Direction _facingDirection = Direction.Up;

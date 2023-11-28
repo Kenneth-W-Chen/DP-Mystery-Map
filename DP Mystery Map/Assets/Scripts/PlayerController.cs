@@ -92,6 +92,13 @@ public class PlayerController : MonoBehaviour
     private float _rightKeyHeldStartTime;
     private Dictionary<Direction, KeyCode> _directionToKeyCode;
 
+    public Animator playerAnimator;
+
+    /// <summary>
+    /// 2D Vector Storing Variables for The Player's Animation Controller
+    /// </summary>
+    Vector2 playerMovementController;
+
     public bool IsGridMovement
     {
         get => _isGridMovement;
@@ -142,6 +149,15 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        playerMovementController.x = Input.GetAxisRaw("Horizontal");
+        playerMovementController.y = Input.GetAxisRaw("Vertical");
+
+        if (WalkingGrid == false)
+        {
+            playerAnimator.SetFloat("Horizontal", playerMovementController.x);
+            playerAnimator.SetFloat("Vertical", playerMovementController.y);
+            playerAnimator.SetFloat("Speed", playerMovementController.sqrMagnitude);
+        }
         _movePlayerUpdate();
     }
 
@@ -208,6 +224,27 @@ public class PlayerController : MonoBehaviour
                 Player.FacingDirection = _walkDirection;
             }
 
+            //Update the idleFacing position per direction
+            switch(Player.FacingDirection)
+            {
+                case Direction.Up:
+                    playerAnimator.SetFloat("faceIdleX", 0);
+                    playerAnimator.SetFloat("faceIdleY", -1);
+                    break;
+                case Direction.Down:
+                    playerAnimator.SetFloat("faceIdleX", 0);
+                    playerAnimator.SetFloat("faceIdleY", 1);
+                    break;
+                case Direction.Left:
+                    playerAnimator.SetFloat("faceIdleX", -1);
+                    playerAnimator.SetFloat("faceIdleY", 0);
+                    break;
+                case Direction.Right:
+                    playerAnimator.SetFloat("faceIdleX", 1);
+                    playerAnimator.SetFloat("faceIdleY", 0);
+                    break;
+            }
+
             CheckKeys();
         }
         //else check for key being pressed down
@@ -231,7 +268,7 @@ public class PlayerController : MonoBehaviour
         var absY = Mathf.Abs(_yMovement);
         if (absY > 0.5f)
         {
-            Player.FacingDirection = _yMovement > 0f ? Direction.Up : Direction.Down;
+            //Player.FacingDirection = _yMovement > 0f ? Direction.Up : Direction.Down;
             if (absX > 0.5f)
             {
                 _xMovement *= _tanSpeed;
@@ -244,7 +281,7 @@ public class PlayerController : MonoBehaviour
         }
         else if (absX > 0.5f)
         {
-            Player.FacingDirection = _xMovement > 0f ? Direction.Right : Direction.Left;
+            //Player.FacingDirection = _xMovement > 0f ? Direction.Right : Direction.Left;
             _xMovement *= freeMoveSpeed;
         }
 
