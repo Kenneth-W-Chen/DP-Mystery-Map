@@ -177,7 +177,7 @@ public class  MainMenu : MonoBehaviour
         saveFileButtons[saveFileNumber].interactable = true;
         saveFileAnimator[saveFileNumber].SetBool(HasSaveFile, true);
         saveFileInfos[saveFileNumber].SetActive(true);
-        saveFileMajors[saveFileNumber].text = Player.majorToString[m_PlayerSaves[saveFileNumber]._major];
+        saveFileMajors[saveFileNumber].text = Player.MajorToString[(short)m_PlayerSaves[saveFileNumber]._major];
     }
     
     /// <summary>
