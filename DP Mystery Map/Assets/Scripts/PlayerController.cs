@@ -359,7 +359,7 @@ public class PlayerController : GameplayScript
     {
         if (!WalkingGrid)
         {
-            if (_walkOn || _walkOnce)
+            if ((_walkOn || _walkOnce) && WalkBlocked == WalkBlockedFlags.CanWalk)
             {
                 WalkingGrid = true;
                 UpdateMovementVals();
