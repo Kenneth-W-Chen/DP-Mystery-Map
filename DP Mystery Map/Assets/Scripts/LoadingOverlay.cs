@@ -39,6 +39,7 @@ public class LoadingOverlay : MonoBehaviour
         if (Reference != this)
             return;
         Reference = null;
+        SceneManager.sceneLoaded -= OnLevelLoad;
     }
     
     private void OnLevelLoad(Scene scene, LoadSceneMode mode)
