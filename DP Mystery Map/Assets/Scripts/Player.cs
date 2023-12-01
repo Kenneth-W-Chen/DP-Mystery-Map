@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -8,6 +9,7 @@ using UnityEngine.SceneManagement;
 
 namespace PlayerInfo
 {
+
     /// <summary>
     /// Enum that defines player's facing direction
     /// </summary>
@@ -74,15 +76,18 @@ namespace PlayerInfo
     {
         public const int MaxHealth = 100;
 
-        public static readonly Dictionary<Major, string> majorToString = new Dictionary<Major, string>()
+        public static readonly ReadOnlyCollection<string> MajorToString = new ReadOnlyCollection<string>(new List<string>()
         {
-            { Major.None, "None" },
-            { Major.ComputerScience, "Computer Science" },
-            { Major.ComputerEngineering, "Computer Engineering" },
-            { Major.ElectricalEngineering, "Electrical Engineering" },
-            { Major.MechanicalEngineering, "Mechanical Engineering" }
-        };
-        
+            "None",
+            "Computer Science",
+            "Computer Engineering",
+            "Electrical Engineering" ,
+            "Mechanical Engineering" 
+        });
+
+        public static readonly ReadOnlyCollection<string> DirectionToString =
+            new ReadOnlyCollection<string>(new List<string>() {"None","Up","Down","Left","Right" });
+
         public static KeyCode MoveUpKey = KeyCode.W;
         public static KeyCode MoveDownKey = KeyCode.S;
         public static KeyCode MoveLeftKey = KeyCode.A;
@@ -408,6 +413,8 @@ namespace PlayerInfo
             this.Position = source.Position;
             this.direction = source.direction;
         }
+        
+        public static explicit operator string(PlayerPosition p) => $"Position: {(string)p.Position}. Direction: {p.direction}";
     }
 
     [Serializable]
@@ -433,7 +440,9 @@ namespace PlayerInfo
         }
 
         public static implicit operator Vector2(SerializableVector2 s) => new Vector2(s.x, s.y);
-        public static implicit operator Vector3(SerializableVector2 s) => new Vector3(s.x, s.y, 0f);
+        public static implicit operator Vector3(SerializableVector2 s) => new Vector3(s.x, s.y, 0.0f);
         public static implicit operator SerializableVector2(Vector2 v) => new SerializableVector2(v);
+
+        public static explicit operator string(SerializableVector2 v) => $"{{{v.x},{v.y}}}";
     }
 }
