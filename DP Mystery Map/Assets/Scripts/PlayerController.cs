@@ -453,5 +453,6 @@ public class PlayerController : GameplayScript
     private void UnsubscribeEvents()
     {
         Player.directionChangeEvent -= _updateColliderHandler;
+        SceneManager.sceneLoaded -= OnLevelLoad;
     }
 }

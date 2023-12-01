@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using PlayerInfo;
+using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -52,7 +53,8 @@ public class PlayerFollow : GameplayScript
 
     private void OnDestroy()
     {
-        if (_reference != this)
+        if (_reference == this)
             _reference = null;
+        SceneManager.sceneLoaded -= OnLevelLoad;
     }
 }

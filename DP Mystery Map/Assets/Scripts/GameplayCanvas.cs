@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine.SceneManagement;
 
 namespace PlayerInfo
 {
@@ -19,6 +20,7 @@ namespace PlayerInfo
         {
             if (reference == this)
                 reference = null;
+            SceneManager.sceneLoaded -= OnLevelLoad;
         }
     }
 }

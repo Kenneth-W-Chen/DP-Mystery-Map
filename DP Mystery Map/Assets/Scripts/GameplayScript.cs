@@ -17,7 +17,7 @@ namespace PlayerInfo
 
         protected virtual void OnLevelLoad(Scene scene, LoadSceneMode mode)
         {
-            if(scene.name == "MainMenu")
+            if(scene.buildIndex == 0)
                 Destroy(this.gameObject);
         }
     }
