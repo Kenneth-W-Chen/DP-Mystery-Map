@@ -242,8 +242,7 @@ public class  MainMenu : MonoBehaviour
     public void LoadGamePlayObjects(SerializableVector2 initialPosition)
     {
         Instantiate(Resources.Load<GameObject>("Prefabs/Gameplay Canvas"));
-        var playerObject = Instantiate(Resources.Load<GameObject>("Prefabs/Player"));
-        playerObject.transform.position = initialPosition;
+        Instantiate(Resources.Load<GameObject>("Prefabs/Player"), (Vector3)initialPosition, Quaternion.identity);
         Instantiate(Resources.Load<GameObject>("Prefabs/Game Camera"));
     }
 }
