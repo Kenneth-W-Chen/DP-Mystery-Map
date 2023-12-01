@@ -5,10 +5,11 @@ using System.IO;
 using PlayerInfo;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
-public class MainMenu : MonoBehaviour
+public class  MainMenu : MonoBehaviour
 {
     /// <summary>
     /// Image for the fade-in transition
@@ -76,7 +77,7 @@ public class MainMenu : MonoBehaviour
             _ => Player.major
         };
         //todo: set up new game 
-        LoadGamePlayObjects();
+        LoadGamePlayObjects(StageData.InitialPosition);
         string savePath = Path.Combine(PlayerSave.defaultSavePath,"1");
         if (!File.Exists(savePath))
             Player.SaveFilePath = String.Copy(savePath);
@@ -86,6 +87,7 @@ public class MainMenu : MonoBehaviour
             Player.SaveFilePath = String.Copy(savePath);
         // todo: prompt player where they want to save the file
         else Player.SaveFilePath = Path.Combine(PlayerSave.defaultSavePath, "999");
+        SceneManager.LoadScene("Scenes/FloorOne");
     }
 
     /// <summary>
@@ -127,7 +129,7 @@ public class MainMenu : MonoBehaviour
     public void StartLoadGame(int index)
     {
         m_PlayerSaves[index].loadData();
-        //todo: load scene
+        LoadGamePlayObjects(m_PlayerSaves[index]._position.Position);
     }
 
     /// <summary>
@@ -236,10 +238,11 @@ public class MainMenu : MonoBehaviour
         }
     }
 
-    public void LoadGamePlayObjects()
+    public void LoadGamePlayObjects(Vector2 initialPosition)
     {
         Instantiate(Resources.Load<GameObject>("Prefabs/Gameplay Canvas"));
-        Instantiate(Resources.Load<GameObject>("Prefabs/Player"));
+        var playerObject = Instantiate(Resources.Load<GameObject>("Prefabs/Player"));
+        playerObject.transform.position = initialPosition;
         Instantiate(Resources.Load<GameObject>("Prefabs/Game Camera"));
     }
 }
