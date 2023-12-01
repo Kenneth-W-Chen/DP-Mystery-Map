@@ -25,7 +25,23 @@ public class PlayerFollow : GameplayScript
         
         _reference = this;
         _zPosition = transform.position.z;
+        StartCoroutine(LateStart());
     }
+    
+    // LateStart is called one frame after Start finishes execution
+    private IEnumerator LateStart()
+    {
+        yield return null;
+        Debug.Log("Late start");
+        if (playerObject)
+        {
+            yield break;
+        }
+        while (PlayerController.playerControllerReference is null)
+            yield return null;
+        this.playerObject = PlayerController.playerControllerReference.gameObject;
+    }
+
 
     // LateUpdate is called after all Update methods are finished
     void LateUpdate()
