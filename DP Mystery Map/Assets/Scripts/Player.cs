@@ -222,12 +222,6 @@ namespace PlayerInfo
             _facingDirection = save._position.direction;
             _major = save._major;
             _health = MaxHealth;
-            if (PlayerController.playerControllerReference is not null)
-                PlayerController.playerControllerReference.transform.position = save._position.Position;
-            else
-            {
-                UnityEngine.Object.Instantiate(PlayerPrefab);
-            }
         }
     }
     
