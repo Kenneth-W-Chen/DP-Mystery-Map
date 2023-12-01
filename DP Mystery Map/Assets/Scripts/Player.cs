@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using Unity.VisualScripting;
 using UnityEngine;
-using Object = System.Object;
+using UnityEngine.SceneManagement;
 
 namespace PlayerInfo
 {
@@ -252,7 +251,7 @@ namespace PlayerInfo
         public Item _collectedItems;
         public Major _major;
         public PlayerPosition _position;
-        
+        public bool isFloorTwo;
         
         [NonSerialized]
         public string SaveFilePath;
@@ -283,6 +282,7 @@ namespace PlayerInfo
                     s._collectedItems = temp._collectedItems;
                     s._position = new PlayerPosition(ref temp._position);
                     s._major = temp._major;
+                    s.isFloorTwo = temp.isFloorTwo;
                     s.SaveFilePath = saveFileName;
                 }
             }
@@ -326,6 +326,7 @@ namespace PlayerInfo
                     this._collectedItems = temp._collectedItems;
                     this._position = new PlayerPosition(ref temp._position);
                     this._major = temp._major;
+                    this.isFloorTwo = temp.isFloorTwo;
                     this.SaveFilePath = saveFileName;
                 }
             }
@@ -350,21 +351,41 @@ namespace PlayerInfo
             MoveRightKey = Player.MoveRightKey;*/
             SaveFilePath = Player.SaveFilePath;
             _collectedItems = Player.collectedItems;
+            isFloorTwo = SceneManager.GetActiveScene().buildIndex == 2;
             _position = new PlayerPosition(PlayerController.playerControllerReference.transform.position, Player.FacingDirection);
         }
 
         private void SerializeData()
         {
-            using (FileStream fs = new FileStream(SaveFilePath, FileMode.Create, FileAccess.Write))
+            if(!Directory.Exists(Path.GetDirectoryName(SaveFilePath)))
+                Directory.CreateDirectory(Path.GetDirectoryName(SaveFilePath)!);
+            try
             {
-                bf.Serialize(fs, this);
+                //temporarily save data to a -temp file, in case serialization doesn't work
+                using (FileStream fs = new FileStream(SaveFilePath + "-temp", FileMode.Create, FileAccess.Write))
+                {
+                    bf.Serialize(fs, this);
+                }
+                // remove old save file
+                if(File.Exists(SaveFilePath))
+                    File.Delete(SaveFilePath);
+                //rename temp file
+                File.Move(SaveFilePath+"-temp",SaveFilePath);
+            }
+            catch (Exception e)
+            {
+                // do not save the file or keep the temp file
+                if(File.Exists(SaveFilePath+"-temp"))
+                    File.Delete(SaveFilePath+"-temp");
+                return;
             }
         }
     }
 
+    [Serializable]
     public struct PlayerPosition
     {
-        public Vector2 Position;
+        public SerializableVector2 Position;
         public Direction direction;
 
         /// <summary>
@@ -374,7 +395,7 @@ namespace PlayerInfo
         /// <param name="direction">The direction the player is facing</param>
         public PlayerPosition(Vector2 position, Direction direction)
         {
-            this.Position = new Vector2(position.x, position.y);
+            this.Position = new SerializableVector2(position);
             this.direction = direction;
         }
 
@@ -387,5 +408,32 @@ namespace PlayerInfo
             this.Position = source.Position;
             this.direction = source.direction;
         }
+    }
+
+    [Serializable]
+    public struct SerializableVector2
+    {
+        public float x, y;
+
+        public SerializableVector2(Vector2 vector2)
+        {
+            this.x = vector2.x;
+            this.y = vector2.y;
+        }
+
+        public SerializableVector2(float x, float y)
+        {
+            this.x = x;
+            this.y = y;
+        }
+
+        public Vector2 ToVector2()
+        {
+            return new Vector2(x, y);
+        }
+
+        public static implicit operator Vector2(SerializableVector2 s) => new Vector2(s.x, s.y);
+        public static implicit operator Vector3(SerializableVector2 s) => new Vector3(s.x, s.y, 0f);
+        public static implicit operator SerializableVector2(Vector2 v) => new SerializableVector2(v);
     }
 }
