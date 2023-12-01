@@ -35,7 +35,7 @@ public class  MainMenu : MonoBehaviour
     
     private static readonly Color Transparent = new Color(0, 0, 0, 0);
     
-    private readonly List<PlayerSave> m_PlayerSaves = new List<PlayerSave>(3){null};
+    private readonly List<PlayerSave> m_PlayerSaves = new(3){null,null,null};
     
     private bool m_OverlayAnimRunning;
     private float m_AnimationTime;
@@ -130,6 +130,7 @@ public class  MainMenu : MonoBehaviour
     {
         m_PlayerSaves[index].loadData();
         LoadGamePlayObjects(m_PlayerSaves[index]._position.Position);
+        SceneManager.LoadScene(m_PlayerSaves[index].isFloorTwo ? 2 : 1);
     }
 
     /// <summary>
@@ -238,7 +239,7 @@ public class  MainMenu : MonoBehaviour
         }
     }
 
-    public void LoadGamePlayObjects(Vector2 initialPosition)
+    public void LoadGamePlayObjects(SerializableVector2 initialPosition)
     {
         Instantiate(Resources.Load<GameObject>("Prefabs/Gameplay Canvas"));
         var playerObject = Instantiate(Resources.Load<GameObject>("Prefabs/Player"));
