@@ -6,6 +6,8 @@ namespace PlayerInfo
 {
     public static class StageData
     {
+        public static readonly Vector2 InitialPosition = new Vector2(82.5f, -108.5f);
+        
         public static readonly ReadOnlyCollection<PlayerPosition> FloorOneToFloorTwoPos = new ReadOnlyCollection<PlayerPosition>(new List<PlayerPosition>()
         {
             new PlayerPosition(new Vector2(-250.5f, 160.5f), Direction.Down),
