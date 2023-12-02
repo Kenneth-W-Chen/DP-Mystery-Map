@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using PlayerInfo;
 using Unity.VisualScripting;
@@ -68,6 +69,8 @@ public class PlayerController : GameplayScript
     /// </summary>
     private const float KeyHeldMinDuration = .25f;
 
+    private const float DefaultStepSpeed = 1f;
+
     /// <summary>
     /// Rigidbody attached to the player object
     /// </summary>
@@ -83,6 +86,13 @@ public class PlayerController : GameplayScript
     /// </summary>
     public float freeMoveSpeed = 5f;
 
+    /// <summary>
+    /// Alternative speed. Speed is adjusted by this value when one of the Player.MovementModifierKeys is held down
+    /// </summary>
+    public float speedModifier = 2f;
+
+    private float _currentStepSpeed = DefaultStepSpeed;
+    
     // Uses these keys for movement; public in case we have time to implement game options
     public KeyCode moveUpKey = KeyCode.W;
     public KeyCode moveDownKey = KeyCode.S;
@@ -352,6 +362,12 @@ public class PlayerController : GameplayScript
             _xMovement *= freeMoveSpeed;
         }
 
+        if (Player.MovementModifierKeys.Any(key => Input.GetKey(key)))
+        {
+            _xMovement *= speedModifier;
+            _yMovement *= speedModifier;
+        }
+
         playerRigidbody.velocity = new Vector2(_xMovement, _yMovement);
     }
 
@@ -369,7 +385,7 @@ public class PlayerController : GameplayScript
         }
 
         playerRigidbody.MovePosition(Vector2.Lerp(_startPos, _endPos,
-            (Time.time - _walkStartTime) / GridWalkDuration));
+            (Time.time - _walkStartTime) * _currentStepSpeed / GridWalkDuration));
         if (playerRigidbody.position == _endPos)
             WalkingGrid = false;
 
@@ -442,6 +458,8 @@ public class PlayerController : GameplayScript
             Direction.Right => _startPos + GridStepSize * Vector2.right,
             _ => _endPos
         };
+        _currentStepSpeed =
+            Player.MovementModifierKeys.Any(key => Input.GetKey(key)) ? speedModifier : DefaultStepSpeed;
     }
 
     // Subscribes functions to events
