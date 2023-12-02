@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using Ink.Runtime;
+using PlayerInfo;
+using UnityEngine.UI;
 
 public class DialogueManager : MonoBehaviour
 {
@@ -13,7 +15,10 @@ public class DialogueManager : MonoBehaviour
 
     private Ink.Runtime.Story currentDialog;
 
-    public bool dialogIsPlaying { get; private set; }
+    public static bool dialogIsPlaying { get; set; }
+
+    private string fullText;
+    private float charRevealDelay = 0.05f;
 
     public static DialogueManager instance { get; private set; }
 
@@ -32,8 +37,17 @@ public class DialogueManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        dialogIsPlaying = false;
-        dialogPanel.SetActive(false);
+
+        if (Player.collectedItems == Item.None)
+        {
+            dialogIsPlaying = true;
+            dialogPanel.SetActive(true);
+        }
+        else
+        {
+            dialogIsPlaying = false;
+            dialogPanel.SetActive(false);
+        }
     }
 
     public void EnterDialogueMode(TextAsset inkJSON)
@@ -52,11 +66,32 @@ public class DialogueManager : MonoBehaviour
         dialogIsPlaying = false;
     }
 
+    IEnumerator ShowText()
+    {
+        if (dialogText == null)
+        {
+            Debug.LogError("dialogText is not assigned. Make sure to assign it in the Inspector.");
+            yield break;
+        }
+
+        fullText = currentDialog.Continue(); // Retrieve the next portion of text
+
+        for (int i = 0; i < fullText.Length; i++)
+        {
+            dialogText.text = fullText.Substring(0, i + 1);
+            yield return new WaitForSeconds(charRevealDelay);
+        }
+
+        // The text has been fully revealed
+        yield return null;
+    }
+
     private void ContinueStory()
     {
         if (currentDialog.canContinue)
         {
             dialogText.text = currentDialog.Continue();
+            StartCoroutine(ShowText());
         }
         else
             ExitDialog();
@@ -68,7 +103,8 @@ public class DialogueManager : MonoBehaviour
         if (!dialogIsPlaying)
             return;
 
-        if (Input.GetKeyUp(InteractivitySystem.interactKey))
+
+        if (Input.GetKeyUp(InteractivitySystem.interactKey) && (dialogText.text == fullText))
             ContinueStory();
     }
 }

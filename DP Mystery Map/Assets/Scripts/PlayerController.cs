@@ -14,16 +14,16 @@ public class PlayerController : MonoBehaviour
     {
         IsGridMovement = !IsGridMovement;
     }
-    
+
     /// <summary>
     /// How long each step should take
     /// </summary>
-    private const float GridWalkDuration = .25f;
+    private float GridWalkDuration = .25f;
     /// <summary>
     /// The length of a single step 
     /// </summary>
     private const float GridStepSize = 1f;
-    
+
     /// <summary>
     /// The duration to consider a key held down rather than pressed
     /// </summary>
@@ -33,17 +33,17 @@ public class PlayerController : MonoBehaviour
     /// Rigidbody attached to the player object
     /// </summary>
     public Rigidbody2D playerRigidbody;
-    
+
     /// <summary>
     /// The transform of the Gameobject the interact collider is attachedd to
     /// </summary>
     public Transform interactColliderTransform;
-    
+
     /// <summary>
     /// The speed the player moves when in free movement mode
     /// </summary>
     public float freeMoveSpeed = 5f;
-    
+
     // Uses these keys for movement; public in case we have time to implement game options
     public KeyCode moveUpKey = KeyCode.W;
     public KeyCode moveDownKey = KeyCode.S;
@@ -60,11 +60,11 @@ public class PlayerController : MonoBehaviour
     /// Currently untracked.
     /// </summary>
     [NonSerialized] public ulong StepsTaken = 0;
-    
+
     private MovePlayerUpdate _movePlayerUpdate;
     private MovePlayerFixedUpdate _movePlayerFixedUpdate;
     private DirectionChangeEventHandler _updateColliderHandler;
-    
+
     private delegate void MovePlayerUpdate();
 
     private delegate void MovePlayerFixedUpdate();
@@ -73,13 +73,15 @@ public class PlayerController : MonoBehaviour
     private float _xMovement;
     private float _yMovement;
     private float _tanSpeed;
-    
+    private bool _isPlayerMoving;
+
     ///<summary>
     /// Determines if the <see cref="playerRigidbody"/> should keep moving once it reaches its position
     /// </summary>
     private bool _walkOn = false;
     private bool _walkOnce = false;
     private float _walkStartTime;
+    private bool _isPlayerColliding = false;
 
     // The direction the player will start walking in. Not necessarily the direction they're facing, until they start walking
     private Direction _walkDirection;
@@ -128,13 +130,13 @@ public class PlayerController : MonoBehaviour
         _movePlayerUpdate = GridMoveUpdate;
         _movePlayerFixedUpdate = GridMoveFixedUpdate;
         _isGridMovement = true;
-        
+
         _updateColliderHandler = UpdateColliders;
         SubscribeEvents();
-        
+
         // Initialization of free movement values
         _tanSpeed = freeMoveSpeed * .707f;
-        
+
         //initialization of
         InitializeGridPosition();
         _directionToKeyCode = new Dictionary<Direction, KeyCode>()
@@ -144,21 +146,17 @@ public class PlayerController : MonoBehaviour
             { Direction.Left, Player.MoveLeftKey},
             { Direction.Right, Player.MoveRightKey }
         };
+
+        Player.FacingDirection = Direction.Down;
     }
 
     // Update is called once per frame
     void Update()
     {
-        playerMovementController.x = Input.GetAxisRaw("Horizontal");
-        playerMovementController.y = Input.GetAxisRaw("Vertical");
+        //Only allow character movement when dialogue isn't active
+        if(!DialogueManager.dialogIsPlaying)
+            _movePlayerUpdate();
 
-        if (WalkingGrid == false)
-        {
-            playerAnimator.SetFloat("Horizontal", playerMovementController.x);
-            playerAnimator.SetFloat("Vertical", playerMovementController.y);
-            playerAnimator.SetFloat("Speed", playerMovementController.sqrMagnitude);
-        }
-        _movePlayerUpdate();
     }
 
     private void FixedUpdate()
@@ -175,7 +173,7 @@ public class PlayerController : MonoBehaviour
     {
         // Intentionally empty
     }
-    
+
     private void GridMoveUpdate()
     {
         //check if key was pressed down
@@ -190,7 +188,7 @@ public class PlayerController : MonoBehaviour
                 Direction.Right => _rightKeyHeldStartTime,
                 _ => 0
             };
-            
+
             //check if the key has been released
             if (Input.GetKeyUp(_directionToKeyCode[_walkDirection]))
             {
@@ -225,7 +223,7 @@ public class PlayerController : MonoBehaviour
             }
 
             //Update the idleFacing position per direction
-            switch(Player.FacingDirection)
+            switch (Player.FacingDirection)
             {
                 case Direction.Up:
                     playerAnimator.SetFloat("faceIdleX", 0);
@@ -252,6 +250,55 @@ public class PlayerController : MonoBehaviour
         {
             CheckKeys();
         }
+
+        //Handle direction faced while moving and idle
+            if (_isPlayerMoving == false)
+            {
+                playerAnimator.SetFloat("Horizontal", playerMovementController.x);
+                playerAnimator.SetFloat("Vertical", playerMovementController.y);
+                playerAnimator.SetFloat("Speed", playerMovementController.sqrMagnitude);
+            }
+            else
+            {
+            //Enable running animation if shift is held
+            if (Input.GetKey(KeyCode.LeftShift) && ((Input.GetKey(Player.MoveUpKey)) ||
+                (Input.GetKey(Player.MoveDownKey)) || (Input.GetKey(Player.MoveLeftKey)) ||
+                (Input.GetKey(Player.MoveRightKey))))
+            {
+                playerAnimator.SetBool("isRunning", true);
+                GridWalkDuration = 0.15625f;
+            }
+            else
+            {
+                playerAnimator.SetBool("isRunning", false);
+                GridWalkDuration = 0.25f;
+            }
+
+            switch (_walkDirection)
+                {
+                    case Direction.Left:
+                        playerMovementController.x = Input.GetAxisRaw("Horizontal");
+                        playerMovementController.y = 0.0f;
+                        break;
+                    case Direction.Right:
+                        playerMovementController.x = Input.GetAxisRaw("Horizontal");
+                        playerMovementController.y = 0.0f;
+                        break;
+                    case Direction.Up:
+                        playerMovementController.x = 0.0f;
+                        playerMovementController.y = Input.GetAxisRaw("Vertical");
+                        break;
+                    case Direction.Down:
+                        playerMovementController.x = 0.0f;
+                        playerMovementController.y = Input.GetAxisRaw("Vertical");
+                        break;
+
+                }
+            }
+
+        //Detect when player is colliding
+        if (_isPlayerColliding == true)
+            _isPlayerMoving = false;
     }
 
     private void FreeMoveFixedUpdate()
@@ -262,7 +309,7 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKey(Player.MoveDownKey)) _yMovement -= 1f;
         if (Input.GetKey(Player.MoveRightKey)) _xMovement += 1f;
         if (Input.GetKey(Player.MoveLeftKey)) _xMovement -= 1f;
-        
+
         // Check if the player is moving diagonally
         var absX = Mathf.Abs(_xMovement);
         var absY = Mathf.Abs(_yMovement);
@@ -287,15 +334,17 @@ public class PlayerController : MonoBehaviour
 
         playerRigidbody.velocity = new Vector2(_xMovement, _yMovement);
     }
-    
+
     private void GridMoveFixedUpdate()
     {
         if (WalkingGrid)
         {
+            _isPlayerMoving = true;
             playerRigidbody.MovePosition(Vector2.Lerp(_startPos, _endPos, (Time.time - _walkStartTime) / GridWalkDuration));
             if (playerRigidbody.position == _endPos)
             {
                 WalkingGrid = false;
+                _isPlayerMoving = false;
                 /*if (StepsTaken == UInt64.MaxValue)
                 {
                     StepsTaken = 0;
@@ -323,7 +372,7 @@ public class PlayerController : MonoBehaviour
             }
         }*/
     }
-    
+
     void UpdateColliders(Direction oldDirection, Direction newDirection)
     {
         // For rotating the interact collider to the side the player is facing
@@ -345,7 +394,7 @@ public class PlayerController : MonoBehaviour
         transform.position = position;
         _startPos = _endPos = position;
     }
-    
+
     //checks if movement keys are pressed down
     private void CheckKeys()
     {
@@ -355,29 +404,26 @@ public class PlayerController : MonoBehaviour
             _keyHeld = true;
             _rightKeyHeldStartTime = Time.time;
         }
-
-        if (Input.GetKeyDown(moveLeftKey))
+        else if (Input.GetKeyDown(moveLeftKey))
         {
             _walkDirection = Direction.Left;
             _keyHeld = true;
             _leftKeyHeldStartTime = Time.time;
         }
-
-        if (Input.GetKeyDown(moveDownKey))
+        else if (Input.GetKeyDown(moveDownKey))
         {
             _walkDirection = Direction.Down;
             _keyHeld = true;
             _downKeyHeldStartTime = Time.time;
         }
-
-        if (Input.GetKeyDown(moveUpKey))
+        else if (Input.GetKeyDown(moveUpKey))
         {
             _walkDirection = Direction.Up;
             _keyHeld = true;
             _upKeyHeldStartTime = Time.time;
         }
     }
-    
+
     private void UpdateMovementVals()
     {
         _walkStartTime = Time.time;
@@ -402,4 +448,19 @@ public class PlayerController : MonoBehaviour
     {
         Player.directionChangeEvent -= _updateColliderHandler;
     }
-} 
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        _isPlayerColliding = true;
+    }
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        _isPlayerColliding = true;
+    }
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        _isPlayerColliding = false;
+    }
+}

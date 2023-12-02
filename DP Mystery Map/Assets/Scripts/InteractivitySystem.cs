@@ -7,7 +7,7 @@ public class InteractivitySystem : MonoBehaviour
     /// <summary>
     /// Player Based Interaction Components
     /// </summary>
-    public static KeyCode interactKey = KeyCode.P;
+    public static KeyCode interactKey = KeyCode.E;
     public Collider2D interactCollider;
 
     public TextAsset inkJson;
