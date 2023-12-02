@@ -94,6 +94,7 @@ namespace PlayerInfo
         public static KeyCode MoveRightKey = KeyCode.D;
         public static KeyCode InteractKey = KeyCode.P;
         public static KeyCode PauseKey = KeyCode.Escape;
+        public static List<KeyCode> MovementModifierKeys = new() { KeyCode.LeftShift, KeyCode.RightShift };
 
         public static string SaveFilePath = $"{Path.Combine(PlayerSave.defaultSavePath, "save1")}";
 
