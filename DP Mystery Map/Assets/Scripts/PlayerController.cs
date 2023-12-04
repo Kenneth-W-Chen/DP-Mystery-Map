@@ -13,6 +13,8 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public class PlayerController : GameplayScript
 {
+    private bool wait = false;
+
     /// <summary>
     /// Flags for what is preventing movement and/or turning
     /// </summary>
@@ -92,7 +94,7 @@ public class PlayerController : GameplayScript
     public float speedModifier = 2f;
 
     private float _currentStepSpeed = DefaultStepSpeed;
-    
+
     // Uses these keys for movement; public in case we have time to implement game options
     public KeyCode moveUpKey = KeyCode.W;
     public KeyCode moveDownKey = KeyCode.S;
@@ -268,12 +270,10 @@ public class PlayerController : GameplayScript
     private void GridMoveUpdate()
     {
         if ((WalkBlocked & WalkBlockedFlags.CantMove) != 0) return;
+        CheckKeys();
         //check if key was pressed down
         if (!_keyHeld)
-        {
-            CheckKeys();
             return;
-        }
 
         //calculate time since the key was pressed
         var timeSincePress = Time.time - _walkDirection switch
@@ -306,7 +306,7 @@ public class PlayerController : GameplayScript
             }
         }
         //else we check to see if enough time has passed to consider the button held down
-        else if (timeSincePress > KeyHeldMinDuration && CanWalk())
+        else if (timeSincePress > KeyHeldMinDuration)
         {
             if (_stopWalking)
             {
@@ -317,11 +317,16 @@ public class PlayerController : GameplayScript
                 return;
             }
 
-            _walkOn = true;
-            Player.FacingDirection = _walkDirection;
-        }
+            if (Player.FacingDirection != _walkDirection)
+            {
+                Player.FacingDirection = _walkDirection;
+                return;
+            }
 
-        CheckKeys();
+            if (CanWalk())
+
+                _walkOn = true;
+        }
     }
 
     private bool CanWalk()
@@ -380,17 +385,26 @@ public class PlayerController : GameplayScript
                 WalkingGrid = true;
                 UpdateMovementVals();
             }
-else
+
             return;
         }
 
         _currentStepTime += Time.fixedDeltaTime;
         playerRigidbody.MovePosition(Vector2.Lerp(_startPos, _endPos,
             _currentStepTime * _currentStepSpeed / GridWalkDuration));
-        if (playerRigidbody.position == _endPos)
-            WalkingGrid = false;
-
         _walkOnce = false;
+        if (playerRigidbody.position == _endPos)
+        {
+            if ((_walkOn || _walkOnce) && WalkBlocked == WalkBlockedFlags.CanWalk)
+            {
+                WalkingGrid = true;
+                UpdateMovementVals();
+            }
+            else
+            {
+                WalkingGrid = false;
+            }
+        }
     }
 
     void UpdateColliders(Direction oldDirection, Direction newDirection)
@@ -449,7 +463,6 @@ else
 
     private void UpdateMovementVals()
     {
-
         _currentStepTime = 0f;
         _startPos = transform.position;
         _endPos = _walkDirection switch
