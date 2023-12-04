@@ -136,7 +136,7 @@ public class PlayerController : GameplayScript
     private bool _walkOn = false;
 
     private bool _walkOnce = false;
-    private float _walkStartTime;
+    private float _currentStepTime;
 
     // The direction the player will start walking in. Not necessarily the direction they're facing, until they start walking
     private Direction _walkDirection;
@@ -185,8 +185,8 @@ public class PlayerController : GameplayScript
                 WalkingGrid = false;
                 _walkOn = false;
                 _walkOnce = false;
-                _walkStartTime = Time.time;
                 _startPos = _endPos = transform.position;
+                _currentStepTime = GridWalkDuration;
             }
         }
         else
@@ -380,12 +380,13 @@ public class PlayerController : GameplayScript
                 WalkingGrid = true;
                 UpdateMovementVals();
             }
-
+else
             return;
         }
 
+        _currentStepTime += Time.fixedDeltaTime;
         playerRigidbody.MovePosition(Vector2.Lerp(_startPos, _endPos,
-            (Time.time - _walkStartTime) * _currentStepSpeed / GridWalkDuration));
+            _currentStepTime * _currentStepSpeed / GridWalkDuration));
         if (playerRigidbody.position == _endPos)
             WalkingGrid = false;
 
@@ -448,7 +449,8 @@ public class PlayerController : GameplayScript
 
     private void UpdateMovementVals()
     {
-        _walkStartTime = Time.time;
+
+        _currentStepTime = 0f;
         _startPos = transform.position;
         _endPos = _walkDirection switch
         {
