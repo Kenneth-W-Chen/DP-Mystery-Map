@@ -1,6 +1,4 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using PlayerInfo;
 using TMPro;
 using UnityEngine;
@@ -9,6 +7,7 @@ using UnityEngine.SceneManagement;
 public class PauseMenu : MonoBehaviour
 {
     public static PauseMenu reference;
+
     // The pause menu content
     public GameObject m_Content;
     public TMP_Text saveNotification;
@@ -22,11 +21,10 @@ public class PauseMenu : MonoBehaviour
     public void ResumeGame()
     {
         HidePauseMenu();
-        PlayerController.playerControllerReference.WalkBlocked &= ~PlayerController.WalkBlockedFlags.Paused; 
+        PlayerController.playerControllerReference.WalkBlocked &= ~PlayerController.WalkBlockedFlags.Paused;
         InteractivitySystem.reference.canInteract = true;
-        
     }
-    
+
     /// <summary>
     /// Pauses the game
     /// </summary>
@@ -55,20 +53,21 @@ public class PauseMenu : MonoBehaviour
 
     private void Start()
     {
-        if(reference is not null)
+        if (reference is not null)
         {
             Destroy(this.gameObject);
             return;
         }
+
         reference = this;
     }
 
     void Update()
     {
-        if (PlayerController.playerControllerReference.WalkingGrid||!Input.GetKeyDown(Player.PauseKey))
+        if (PlayerController.playerControllerReference.WalkingGrid || !Input.GetKeyDown(Player.PauseKey))
             return;
         // if pause menu visible
-        if(m_Content.activeSelf)
+        if (m_Content.activeSelf)
             ResumeGame();
         else // pause menu is not visible, so show it
         {
@@ -95,7 +94,7 @@ public class PauseMenu : MonoBehaviour
     {
         m_Content.SetActive(true);
     }
-    
+
     private void HidePauseMenu()
     {
         m_Content.SetActive(false);
@@ -112,5 +111,4 @@ public class PauseMenu : MonoBehaviour
         yield return new WaitForSeconds(3);
         saveNotificationVisible = saveNotification.enabled = false;
     }
-    
 }

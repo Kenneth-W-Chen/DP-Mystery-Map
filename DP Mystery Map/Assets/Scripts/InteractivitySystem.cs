@@ -1,26 +1,23 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using PlayerInfo;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class InteractivitySystem : MonoBehaviour
 {
     public static InteractivitySystem reference;
-    
+
     /// <summary>
     /// Player Based Interaction Components
     /// </summary>
-    
     public Collider2D interactCollider;
 
     [NonSerialized] public bool canInteract = true;
-    
+
     /// <summary>
     /// Detection/Flags for Interaction
     /// </summary>
     private bool npcCollision = false;
+
     private bool itemCollision = false;
     private GameObject itemObject = null;
     private GameObject npcObject = null;
@@ -32,14 +29,15 @@ public class InteractivitySystem : MonoBehaviour
             Destroy(this);
             return;
         }
-        
+
         reference = this;
     }
 
     //Set update to constantly check for player input
     void Update()
     {
-        if (Input.GetKeyUp(Player.InteractKey) && canInteract && !PlayerController.playerControllerReference.WalkingGrid)
+        if (Input.GetKeyUp(Player.InteractKey) && canInteract &&
+            !PlayerController.playerControllerReference.WalkingGrid)
         {
             interactionType();
         }

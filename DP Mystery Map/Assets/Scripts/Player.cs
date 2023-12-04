@@ -9,7 +9,6 @@ using UnityEngine.SceneManagement;
 
 namespace PlayerInfo
 {
-
     /// <summary>
     /// Enum that defines player's facing direction
     /// </summary>
@@ -26,22 +25,22 @@ namespace PlayerInfo
     /// Bitflag for items
     /// </summary>
     [Flags, Serializable]
-    public enum Item:short
+    public enum Item : short
     {
-       None = 0,
-       Keys = 1,
-       Phone = 2,
-       Backpack = 4,
-       Book = 8,
-       Pen = 16,
-       CreamCheese = 32,
-       All = 63
+        None = 0,
+        Keys = 1,
+        Phone = 2,
+        Backpack = 4,
+        Book = 8,
+        Pen = 16,
+        CreamCheese = 32,
+        All = 63
     }
 
     /// <summary>
     /// Enum describing which major the player has
     /// </summary>
-    public enum Major:short
+    public enum Major : short
     {
         None = 0,
         ComputerEngineering = 1,
@@ -49,12 +48,12 @@ namespace PlayerInfo
         ElectricalEngineering = 3,
         MechanicalEngineering = 4
     }
-    
+
     /// <summary>
     /// Event handler delegate that is fired when the player collects all items.
     /// </summary>
     public delegate void ALlItemsCollectedEventHandler();
-    
+
     /// <summary>
     /// Event handler delegate that is fired when the player's direction changes.
     /// </summary>
@@ -68,7 +67,7 @@ namespace PlayerInfo
     /// <param name="oldValue">The health before the change</param>
     /// <param name="newValue">The health after the change</param>
     public delegate void HealthChangeEventHandler(int oldValue, int newValue);
-    
+
     /// <summary>
     /// This class holds settings and statuses for the player. Does not inherit MonoBehavior and should not use any Unity objects.
     /// </summary>
@@ -76,17 +75,18 @@ namespace PlayerInfo
     {
         public const int MaxHealth = 100;
 
-        public static readonly ReadOnlyCollection<string> MajorToString = new ReadOnlyCollection<string>(new List<string>()
-        {
-            "None",
-            "Computer Science",
-            "Computer Engineering",
-            "Electrical Engineering" ,
-            "Mechanical Engineering" 
-        });
+        public static readonly ReadOnlyCollection<string> MajorToString = new ReadOnlyCollection<string>(
+            new List<string>()
+            {
+                "None",
+                "Computer Science",
+                "Computer Engineering",
+                "Electrical Engineering",
+                "Mechanical Engineering"
+            });
 
         public static readonly ReadOnlyCollection<string> DirectionToString =
-            new ReadOnlyCollection<string>(new List<string>() {"None","Up","Down","Left","Right" });
+            new ReadOnlyCollection<string>(new List<string>() { "None", "Up", "Down", "Left", "Right" });
 
         public static KeyCode MoveUpKey = KeyCode.W;
         public static KeyCode MoveDownKey = KeyCode.S;
@@ -98,14 +98,15 @@ namespace PlayerInfo
 
         public static string SaveFilePath = $"{Path.Combine(PlayerSave.defaultSavePath, "save1")}";
 
-        
-        
-        private static readonly GameObject PlayerPrefab = (GameObject) UnityEngine.Resources.Load("prefabs/player", typeof(GameObject));
+
+        private static readonly GameObject PlayerPrefab =
+            (GameObject)UnityEngine.Resources.Load("prefabs/player", typeof(GameObject));
+
         /// <summary>
         /// The items the player has collected
         /// </summary>
         private static Item _collectedItems = Item.None;
-        
+
         /// <summary>
         /// The direction the player is facing
         /// </summary>
@@ -115,7 +116,7 @@ namespace PlayerInfo
         /// The player's major
         /// </summary>
         private static Major _major = Major.None;
-        
+
         /// <summary>
         /// Player health
         /// </summary>
@@ -126,7 +127,7 @@ namespace PlayerInfo
         /// This event should only fire once.
         /// </summary>
         public static event ALlItemsCollectedEventHandler allItemsCollectedEvent;
-        
+
         /// <summary>
         /// Subscribe to this event to execute a command when the direction the player faces changes.
         /// This only fires when the direction changes. It does not fire whenever the FacingDirection variable is set. 
@@ -137,7 +138,7 @@ namespace PlayerInfo
         /// Subscribe to this event to execute a command when the player's health changes.
         /// </summary>
         public static event HealthChangeEventHandler healthChangeEvent;
-        
+
         /// <summary>
         /// Gets or sets the player's facing direction information. Fires a <see cref="directionChangeEvent"/> if the value is set to a different value.
         /// </summary>
@@ -166,7 +167,7 @@ namespace PlayerInfo
                     return;
                 int oldValue = _health;
                 // prevents the player from having health points over max value
-                _health = value>MaxHealth?MaxHealth:value;
+                _health = value > MaxHealth ? MaxHealth : value;
                 healthChangeEvent?.Invoke(oldValue, _health);
             }
         }
@@ -184,14 +185,14 @@ namespace PlayerInfo
                 if ((_collectedItems & value) != _collectedItems || _collectedItems == value || (short)value > 63)
                     return;
                 _collectedItems = value;
-                if((short)value == 63)
+                if ((short)value == 63)
                     allItemsCollectedEvent?.Invoke();
             }
         }
 
         public static Major major
         {
-            get=>_major;
+            get => _major;
             set => _major = value;
         }
 
@@ -203,7 +204,7 @@ namespace PlayerInfo
             MoveUpKey = KeyCode.W;
             MoveDownKey = KeyCode.S;
             MoveLeftKey = KeyCode.A;
-            MoveRightKey = KeyCode.D;            
+            MoveRightKey = KeyCode.D;
         }
 
         /// <summary>
@@ -225,7 +226,7 @@ namespace PlayerInfo
             _health = MaxHealth;
         }
     }
-    
+
     /// <summary>
     /// This class holds information for player info to be serialized.
     /// For class member documentation, see <see cref="Player"/> members of same names
@@ -237,24 +238,25 @@ namespace PlayerInfo
         /// <summary>
         /// The default path for save game files
         /// </summary>
-        public static readonly string defaultSavePath = $"{Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),"DP-Map-Saves")}";
+        public static readonly string defaultSavePath =
+            $"{Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DP-Map-Saves")}";
+
         /// <summary>
         /// BinaryFormatter used for serializing data
         /// </summary>
         public static BinaryFormatter bf = new BinaryFormatter();
-        
+
         /*public KeyCode MoveUpKey;
         public KeyCode MoveDownKey;
         public KeyCode MoveLeftKey;
         public KeyCode MoveRightKey;*/
-        
+
         public Item _collectedItems;
         public Major _major;
         public PlayerPosition _position;
         public bool isFloorTwo;
-        
-        [NonSerialized]
-        public string SaveFilePath;
+
+        [NonSerialized] public string SaveFilePath;
 
         /// <summary>
         /// Loads the save file information from the disk to the object.
@@ -267,7 +269,7 @@ namespace PlayerInfo
         {
             if (!fullPath)
                 saveFileName = Path.Combine(defaultSavePath, saveFileName);
-            if(!File.Exists(saveFileName))
+            if (!File.Exists(saveFileName))
                 return null;
             PlayerSave s = new PlayerSave();
             using (FileStream fs = new FileStream(saveFileName, FileMode.Open, FileAccess.Read))
@@ -289,7 +291,7 @@ namespace PlayerInfo
 
             return s;
         }
-        
+
         /// <summary>
         /// Saves player information to file
         /// </summary>
@@ -302,7 +304,7 @@ namespace PlayerInfo
             SaveData();
             SerializeData();
         }
-        
+
         /// <summary>
         /// Loads the save file information from the disk to the object.
         /// Does not load the data into the game state. Use <see cref="loadData"/> to load game data.
@@ -313,7 +315,7 @@ namespace PlayerInfo
         {
             if (!fullPath)
                 saveFileName = Path.Combine(defaultSavePath, saveFileName);
-            
+
             using (FileStream fs = new FileStream(saveFileName, FileMode.Open, FileAccess.Read))
             {
                 object deserialized = bf.Deserialize(fs);
@@ -352,12 +354,13 @@ namespace PlayerInfo
             SaveFilePath = Player.SaveFilePath;
             _collectedItems = Player.collectedItems;
             isFloorTwo = SceneManager.GetActiveScene().buildIndex == 2;
-            _position = new PlayerPosition(PlayerController.playerControllerReference.transform.position, Player.FacingDirection);
+            _position = new PlayerPosition(PlayerController.playerControllerReference.transform.position,
+                Player.FacingDirection);
         }
 
         private void SerializeData()
         {
-            if(!Directory.Exists(Path.GetDirectoryName(SaveFilePath)))
+            if (!Directory.Exists(Path.GetDirectoryName(SaveFilePath)))
                 Directory.CreateDirectory(Path.GetDirectoryName(SaveFilePath)!);
             try
             {
@@ -366,18 +369,18 @@ namespace PlayerInfo
                 {
                     bf.Serialize(fs, this);
                 }
+
                 // remove old save file
-                if(File.Exists(SaveFilePath))
+                if (File.Exists(SaveFilePath))
                     File.Delete(SaveFilePath);
                 //rename temp file
-                File.Move(SaveFilePath+"-temp",SaveFilePath);
+                File.Move(SaveFilePath + "-temp", SaveFilePath);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 // do not save the file or keep the temp file
-                if(File.Exists(SaveFilePath+"-temp"))
-                    File.Delete(SaveFilePath+"-temp");
-                return;
+                if (File.Exists(SaveFilePath + "-temp"))
+                    File.Delete(SaveFilePath + "-temp");
             }
         }
     }
@@ -408,8 +411,9 @@ namespace PlayerInfo
             this.Position = source.Position;
             this.direction = source.direction;
         }
-        
-        public static explicit operator string(PlayerPosition p) => $"Position: {(string)p.Position}. Direction: {p.direction}";
+
+        public static explicit operator string(PlayerPosition p) =>
+            $"Position: {(string)p.Position}. Direction: {p.direction}";
     }
 
     [Serializable]

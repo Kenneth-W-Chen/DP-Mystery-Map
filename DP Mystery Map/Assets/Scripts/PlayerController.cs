@@ -1,10 +1,7 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using PlayerInfo;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -391,6 +388,7 @@ public class PlayerController : GameplayScript
 
             return;
         }
+
         _currentStepTime += Time.fixedDeltaTime;
         playerRigidbody.MovePosition(Vector2.Lerp(_startPos, _endPos,
             _currentStepTime * _currentStepSpeed / GridWalkDuration));
