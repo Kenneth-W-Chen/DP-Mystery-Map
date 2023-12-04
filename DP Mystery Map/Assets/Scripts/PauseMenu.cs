@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using PlayerInfo;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -10,6 +11,10 @@ public class PauseMenu : MonoBehaviour
     public static PauseMenu reference;
     // The pause menu content
     public GameObject m_Content;
+    public TMP_Text saveNotification;
+
+    private bool saveNotificationVisible;
+    private Coroutine saveNotificationCoroutine;
 
     /// <summary>
     /// Resumes the game
@@ -39,6 +44,7 @@ public class PauseMenu : MonoBehaviour
     {
         PlayerSave save = new PlayerSave();
         save.Save();
+        saveNotificationCoroutine = StartCoroutine(SaveNotification());
     }
 
     public void ExitToMainMenuConfirmation()
@@ -70,6 +76,15 @@ public class PauseMenu : MonoBehaviour
         }
     }
 
+    private void OnDisable()
+    {
+        if (saveNotificationVisible)
+        {
+            StopCoroutine(saveNotificationCoroutine);
+            saveNotificationVisible = saveNotification.enabled = false;
+        }
+    }
+
     private void OnDestroy()
     {
         if (reference == this)
@@ -90,4 +105,12 @@ public class PauseMenu : MonoBehaviour
     {
         SceneManager.LoadScene("MainMenu");
     }
+
+    private IEnumerator SaveNotification()
+    {
+        saveNotificationVisible = saveNotification.enabled = true;
+        yield return new WaitForSeconds(3);
+        saveNotificationVisible = saveNotification.enabled = false;
+    }
+    
 }
