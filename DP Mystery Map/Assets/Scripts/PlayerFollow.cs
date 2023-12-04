@@ -5,27 +5,27 @@ using UnityEngine.SceneManagement;
 
 public class PlayerFollow : GameplayScript
 {
-
     public GameObject playerObject;
 
     private static PlayerFollow _reference;
 
     private float _zPosition;
-    
+
     protected override void Start()
     {
-        if(_reference is not null)
+        if (_reference is not null)
         {
             Destroy(this.gameObject);
             return;
         }
+
         base.Start();
-        
+
         _reference = this;
         _zPosition = transform.position.z;
         StartCoroutine(LateStart());
     }
-    
+
     // LateStart is called one frame after Start finishes execution
     private IEnumerator LateStart()
     {
@@ -35,6 +35,7 @@ public class PlayerFollow : GameplayScript
         {
             yield break;
         }
+
         while (PlayerController.playerControllerReference is null)
             yield return null;
         this.playerObject = PlayerController.playerControllerReference.gameObject;
@@ -45,7 +46,7 @@ public class PlayerFollow : GameplayScript
     void LateUpdate()
     {
         var newPosition = playerObject.transform.position;
-        this.transform.position = new Vector3(newPosition.x,newPosition.y, _zPosition);
+        this.transform.position = new Vector3(newPosition.x, newPosition.y, _zPosition);
     }
 
     private void OnDestroy()

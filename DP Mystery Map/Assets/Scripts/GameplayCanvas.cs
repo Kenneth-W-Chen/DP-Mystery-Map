@@ -1,11 +1,11 @@
-﻿using System;
-using UnityEngine.SceneManagement;
+﻿using UnityEngine.SceneManagement;
 
 namespace PlayerInfo
 {
     public class GameplayCanvas : GameplayScript
     {
         private static GameplayCanvas reference;
+
         protected override void Start()
         {
             if (reference is not null)
@@ -13,6 +13,7 @@ namespace PlayerInfo
                 Destroy(this.gameObject);
                 return;
             }
+
             base.Start();
         }
 

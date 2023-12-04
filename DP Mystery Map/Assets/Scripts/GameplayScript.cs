@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace PlayerInfo
@@ -17,7 +16,7 @@ namespace PlayerInfo
 
         protected virtual void OnLevelLoad(Scene scene, LoadSceneMode mode)
         {
-            if(scene.buildIndex == 0)
+            if (scene.buildIndex == 0)
                 Destroy(this.gameObject);
         }
     }
