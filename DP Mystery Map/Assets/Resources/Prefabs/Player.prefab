@@ -351,6 +351,7 @@ MonoBehaviour:
   playerRigidbody: {fileID: 1374854384162403868}
   interactColliderTransform: {fileID: 8262324325969140430}
   freeMoveSpeed: 5
+  speedModifier: 2
   moveUpKey: 119
   moveDownKey: 115
   moveLeftKey: 97
