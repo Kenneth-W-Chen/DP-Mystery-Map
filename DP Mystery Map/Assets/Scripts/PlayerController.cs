@@ -320,9 +320,11 @@ public class PlayerController : GameplayScript
             if (Player.FacingDirection != _walkDirection)
             {
                 Player.FacingDirection = _walkDirection;
+                wait = true;
                 return;
             }
 
+            if (wait) return;
             if (CanWalk())
 
                 _walkOn = true;
@@ -378,6 +380,7 @@ public class PlayerController : GameplayScript
 
     private void GridMoveFixedUpdate()
     {
+        wait = false;
         if (!WalkingGrid)
         {
             if ((_walkOn || _walkOnce) && WalkBlocked == WalkBlockedFlags.CanWalk)
@@ -388,7 +391,6 @@ public class PlayerController : GameplayScript
 
             return;
         }
-
         _currentStepTime += Time.fixedDeltaTime;
         playerRigidbody.MovePosition(Vector2.Lerp(_startPos, _endPos,
             _currentStepTime * _currentStepSpeed / GridWalkDuration));
