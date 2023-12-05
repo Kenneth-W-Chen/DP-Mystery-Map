@@ -111,7 +111,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9087691811919101937}
   - component: {fileID: 4298980912567800895}
-  - component: {fileID: 8969472349363882397}
+  - component: {fileID: 4718793862086033833}
   m_Layer: 0
   m_Name: MinimapCamera
   m_TagString: Untagged
@@ -127,14 +127,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7284424140272800127}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.94551855, y: 0, z: 0, w: 0.32556817}
-  m_LocalPosition: {x: 0.5, y: 0.5, z: 155}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 3819094629680273480}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 142, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!20 &4298980912567800895
 Camera:
   m_ObjectHideFlags: 0
@@ -186,7 +186,7 @@ Camera:
   m_OcclusionCulling: 0
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!114 &8969472349363882397
+--- !u!114 &4718793862086033833
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -195,7 +195,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7284424140272800127}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1cd5138b29d7b8b4e90a7014e0fcab42, type: 3}
+  m_Script: {fileID: 11500000, guid: bdc49413a27d09041ac8604be9875430, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   playerObject: {fileID: 0}
