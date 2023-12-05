@@ -246,5 +246,6 @@ public class MainMenu : MonoBehaviour
         Instantiate(Resources.Load<GameObject>("Prefabs/Gameplay Canvas"));
         Instantiate(Resources.Load<GameObject>("Prefabs/Player"), (Vector3)initialPosition, Quaternion.identity);
         Instantiate(Resources.Load<GameObject>("Prefabs/Game Camera"));
+        Instantiate(Resources.Load<GameObject>("Prefabs/MinimapCamera"));
     }
 }
