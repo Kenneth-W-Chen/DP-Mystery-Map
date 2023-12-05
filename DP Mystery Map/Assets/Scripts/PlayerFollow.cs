@@ -30,7 +30,6 @@ public class PlayerFollow : GameplayScript
     private IEnumerator LateStart()
     {
         yield return null;
-        Debug.Log("Late start");
         if (playerObject)
         {
             yield break;
