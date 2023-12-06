@@ -61,6 +61,7 @@ namespace PlayerInfo
         public static KeyCode MoveDownKey = KeyCode.S;
         public static KeyCode MoveLeftKey = KeyCode.A;
         public static KeyCode MoveRightKey = KeyCode.D;
+        public static KeyCode interactKey = KeyCode.E;
 
         /// <summary>
         /// The items the player has collected
@@ -110,6 +111,28 @@ namespace PlayerInfo
             }
         }
 
+        public static void SetIdleFacingDirection(Animator playerAnimator)
+        {
+            switch (_facingDirection)
+            {
+                case Direction.Up:
+                    playerAnimator.SetFloat("faceIdleX", 0);
+                    playerAnimator.SetFloat("faceIdleY", -1);
+                    break;
+                case Direction.Down:
+                    playerAnimator.SetFloat("faceIdleX", 0);
+                    playerAnimator.SetFloat("faceIdleY", 1);
+                    break;
+                case Direction.Left:
+                    playerAnimator.SetFloat("faceIdleX", -1);
+                    playerAnimator.SetFloat("faceIdleY", 0);
+                    break;
+                case Direction.Right:
+                    playerAnimator.SetFloat("faceIdleX", 1);
+                    playerAnimator.SetFloat("faceIdleY", 0);
+                    break;
+            }
+        }
         /// <summary>
         /// Gets or sets the player's health. Fires a <see cref="healthChangeEvent"/> if health changes.
         /// </summary>

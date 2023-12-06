@@ -33,6 +33,13 @@ public class DialogueManager : MonoBehaviour
             Destroy(gameObject); // Ensure only one instance exists
         }
     }
+    private void OnDestroy()
+    {
+        if (instance == this)
+        {
+            instance = null;
+        }
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -68,6 +75,8 @@ public class DialogueManager : MonoBehaviour
 
     IEnumerator ShowText()
     {
+        bool advanceText = false;
+
         if (dialogText == null)
         {
             Debug.LogError("dialogText is not assigned. Make sure to assign it in the Inspector.");
@@ -79,11 +88,29 @@ public class DialogueManager : MonoBehaviour
         for (int i = 0; i < fullText.Length; i++)
         {
             dialogText.text = fullText.Substring(0, i + 1);
-            yield return new WaitForSeconds(charRevealDelay);
+
+            //If space is pressed then text will auto reveal
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                advanceText = true;
+                Debug.Log("Space");
+            }
+
+            if (advanceText == false)
+                yield return new WaitForSeconds(charRevealDelay);
+            else
+            {
+                dialogText.text = fullText;
+                yield return null;
+            }
+            
         }
 
-        // The text has been fully revealed
-        yield return null;
+        if (!advanceText)
+        {
+            // The text has been fully revealed
+            yield return null;
+        }
     }
 
     private void ContinueStory()
@@ -104,7 +131,7 @@ public class DialogueManager : MonoBehaviour
             return;
 
 
-        if (Input.GetKeyUp(InteractivitySystem.interactKey) && (dialogText.text == fullText))
+        if (Input.GetKeyUp(Player.interactKey) && (dialogText.text == fullText))
             ContinueStory();
     }
 }

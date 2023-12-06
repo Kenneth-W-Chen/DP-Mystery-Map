@@ -73,7 +73,6 @@ public class PlayerController : MonoBehaviour
     private float _xMovement;
     private float _yMovement;
     private float _tanSpeed;
-    private bool _isPlayerMoving;
 
     ///<summary>
     /// Determines if the <see cref="playerRigidbody"/> should keep moving once it reaches its position
@@ -81,7 +80,6 @@ public class PlayerController : MonoBehaviour
     private bool _walkOn = false;
     private bool _walkOnce = false;
     private float _walkStartTime;
-    private bool _isPlayerColliding = false;
 
     // The direction the player will start walking in. Not necessarily the direction they're facing, until they start walking
     private Direction _walkDirection;
@@ -146,16 +144,14 @@ public class PlayerController : MonoBehaviour
             { Direction.Left, Player.MoveLeftKey},
             { Direction.Right, Player.MoveRightKey }
         };
-
-        Player.FacingDirection = Direction.Down;
     }
 
     // Update is called once per frame
     void Update()
     {
         //Only allow character movement when dialogue isn't active
-        if(!DialogueManager.dialogIsPlaying)
-            _movePlayerUpdate();
+        //Set player status to interacting once merged with main
+
 
     }
 
@@ -222,27 +218,7 @@ public class PlayerController : MonoBehaviour
                 Player.FacingDirection = _walkDirection;
             }
 
-            //Update the idleFacing position per direction
-            switch (Player.FacingDirection)
-            {
-                case Direction.Up:
-                    playerAnimator.SetFloat("faceIdleX", 0);
-                    playerAnimator.SetFloat("faceIdleY", -1);
-                    break;
-                case Direction.Down:
-                    playerAnimator.SetFloat("faceIdleX", 0);
-                    playerAnimator.SetFloat("faceIdleY", 1);
-                    break;
-                case Direction.Left:
-                    playerAnimator.SetFloat("faceIdleX", -1);
-                    playerAnimator.SetFloat("faceIdleY", 0);
-                    break;
-                case Direction.Right:
-                    playerAnimator.SetFloat("faceIdleX", 1);
-                    playerAnimator.SetFloat("faceIdleY", 0);
-                    break;
-            }
-
+            Player.SetIdleFacingDirection(playerAnimator);
             CheckKeys();
         }
         //else check for key being pressed down
@@ -252,7 +228,7 @@ public class PlayerController : MonoBehaviour
         }
 
         //Handle direction faced while moving and idle
-            if (_isPlayerMoving == false)
+            if (WalkingGrid == false)
             {
                 playerAnimator.SetFloat("Horizontal", playerMovementController.x);
                 playerAnimator.SetFloat("Vertical", playerMovementController.y);
@@ -277,28 +253,24 @@ public class PlayerController : MonoBehaviour
             switch (_walkDirection)
                 {
                     case Direction.Left:
-                        playerMovementController.x = Input.GetAxisRaw("Horizontal");
+                        playerMovementController.x = -1.0f;
                         playerMovementController.y = 0.0f;
                         break;
                     case Direction.Right:
-                        playerMovementController.x = Input.GetAxisRaw("Horizontal");
+                        playerMovementController.x = 1.0f;
                         playerMovementController.y = 0.0f;
                         break;
                     case Direction.Up:
                         playerMovementController.x = 0.0f;
-                        playerMovementController.y = Input.GetAxisRaw("Vertical");
+                        playerMovementController.y = 1.0f;
                         break;
                     case Direction.Down:
                         playerMovementController.x = 0.0f;
-                        playerMovementController.y = Input.GetAxisRaw("Vertical");
+                        playerMovementController.y = -1.0f;
                         break;
 
                 }
             }
-
-        //Detect when player is colliding
-        if (_isPlayerColliding == true)
-            _isPlayerMoving = false;
     }
 
     private void FreeMoveFixedUpdate()
@@ -339,12 +311,10 @@ public class PlayerController : MonoBehaviour
     {
         if (WalkingGrid)
         {
-            _isPlayerMoving = true;
             playerRigidbody.MovePosition(Vector2.Lerp(_startPos, _endPos, (Time.time - _walkStartTime) / GridWalkDuration));
             if (playerRigidbody.position == _endPos)
             {
                 WalkingGrid = false;
-                _isPlayerMoving = false;
                 /*if (StepsTaken == UInt64.MaxValue)
                 {
                     StepsTaken = 0;
@@ -447,20 +417,5 @@ public class PlayerController : MonoBehaviour
     private void UnsubscribeEvents()
     {
         Player.directionChangeEvent -= _updateColliderHandler;
-    }
-
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        _isPlayerColliding = true;
-    }
-
-    private void OnCollisionStay2D(Collision2D collision)
-    {
-        _isPlayerColliding = true;
-    }
-
-    private void OnCollisionExit2D(Collision2D collision)
-    {
-        _isPlayerColliding = false;
     }
 }

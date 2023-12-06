@@ -1,13 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using PlayerInfo;
 
 public class InteractivitySystem : MonoBehaviour
 {
     /// <summary>
     /// Player Based Interaction Components
     /// </summary>
-    public static KeyCode interactKey = KeyCode.E;
     public Collider2D interactCollider;
 
     public TextAsset inkJson;
@@ -23,7 +23,7 @@ public class InteractivitySystem : MonoBehaviour
     //Set update to constantly check for player input
     void Update()
     {
-        if (Input.GetKeyUp(interactKey))
+        if (Input.GetKeyUp(Player.interactKey))
         {
             interactionType();
         }
@@ -53,8 +53,19 @@ public class InteractivitySystem : MonoBehaviour
     private void itemInteraction()
     {
         Debug.Log("Interacting with item.");
+        onKeyItems();
         Destroy(itemObject);
         itemObject = null;
+    }
+
+    //Update player questProgression
+    private void onKeyItems()
+    {
+        if(itemObject.gameObject.name == "Keys")
+        {
+            Debug.Log("Congratulations Keys Found!");
+            Player.collectedItems = Item.Keys;
+        }
     }
 
     /// <summary>
