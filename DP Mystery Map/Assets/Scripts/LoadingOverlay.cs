@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -21,7 +18,7 @@ public class LoadingOverlay : MonoBehaviour
     {
         image.enabled = text.enabled = false;
     }
-    
+
     void Start()
     {
         if (Reference is not null)
@@ -34,13 +31,15 @@ public class LoadingOverlay : MonoBehaviour
         SceneManager.sceneLoaded += OnLevelLoad;
         Hide();
     }
+
     private void OnDestroy()
     {
         if (Reference != this)
             return;
         Reference = null;
+        SceneManager.sceneLoaded -= OnLevelLoad;
     }
-    
+
     private void OnLevelLoad(Scene scene, LoadSceneMode mode)
     {
         Hide();

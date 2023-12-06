@@ -25,7 +25,22 @@ public class MinimapCam : GameplayScript
 
         _reference = this;
         _zPosition = transform.position.z;
+        StartCoroutine(LateStart());
     }
+    // LateStart is called one frame after Start finishes execution
+    private IEnumerator LateStart()
+    {
+        yield return null;
+        if (playerObject)
+        {
+            yield break;
+        }
+
+        while (PlayerController.playerControllerReference is null)
+            yield return null;
+        this.playerObject = PlayerController.playerControllerReference.gameObject;
+    }
+
 
     // LateUpdate is called after all Update methods are finished
     void LateUpdate()
@@ -38,5 +53,6 @@ public class MinimapCam : GameplayScript
     {
         if (_reference != this)
             _reference = null;
+        SceneManager.sceneLoaded -= OnLevelLoad;
     }
 }

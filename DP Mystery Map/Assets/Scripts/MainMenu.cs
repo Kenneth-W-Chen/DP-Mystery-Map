@@ -5,6 +5,7 @@ using System.IO;
 using PlayerInfo;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
@@ -22,23 +23,23 @@ public class MainMenu : MonoBehaviour
     public float transitionSpeed = 0.1f;
     public float targetTime = 3f;
 
-    public GameObject loadGameContent; 
+    public GameObject loadGameContent;
     public List<GameObject> saveFileGameObjects;
     public List<Button> saveFileButtons;
     public List<Animator> saveFileAnimator;
-    
+
     public List<GameObject> saveFileInfos;
     public List<TMP_Text> saveFileMajors;
     public List<GameObject> saveFileCollectedItemsNone;
     public GameObject loadMenuErrorMessage;
-    
+
     private static readonly Color Transparent = new Color(0, 0, 0, 0);
-    
-    private readonly List<PlayerSave> m_PlayerSaves = new List<PlayerSave>(3){null};
-    
+
+    private readonly List<PlayerSave> m_PlayerSaves = new(3) { null, null, null };
+
     private bool m_OverlayAnimRunning;
     private float m_AnimationTime;
-    
+
     private static readonly int HasSaveFile = Animator.StringToHash("HasSaveFile");
 
     /// <summary>
@@ -50,7 +51,7 @@ public class MainMenu : MonoBehaviour
         // Consider adding a confirmation screen?
         Application.Quit();
     }
-    
+
     /// <summary>
     /// Shows the prompt for major selection.
     /// Called by New Game Button
@@ -76,8 +77,8 @@ public class MainMenu : MonoBehaviour
             _ => Player.major
         };
         //todo: set up new game 
-        LoadGamePlayObjects();
-        string savePath = Path.Combine(PlayerSave.defaultSavePath,"1");
+        LoadGamePlayObjects(StageData.InitialPosition);
+        string savePath = Path.Combine(PlayerSave.defaultSavePath, "1");
         if (!File.Exists(savePath))
             Player.SaveFilePath = String.Copy(savePath);
         else if (!File.Exists((savePath = Path.Combine(PlayerSave.defaultSavePath, "2"))))
@@ -86,6 +87,7 @@ public class MainMenu : MonoBehaviour
             Player.SaveFilePath = String.Copy(savePath);
         // todo: prompt player where they want to save the file
         else Player.SaveFilePath = Path.Combine(PlayerSave.defaultSavePath, "999");
+        SceneManager.LoadScene("Scenes/FloorOne");
     }
 
     /// <summary>
@@ -115,6 +117,7 @@ public class MainMenu : MonoBehaviour
             saveFileButtons[i].interactable = false;
             saveFileInfos[i].SetActive(false);
         }
+
         /*StartCoroutine(OverlayFadeOutCoroutine(action));*/
         loadMenuErrorMessage.SetActive(false);
         loadGameContent.SetActive(false);
@@ -127,7 +130,8 @@ public class MainMenu : MonoBehaviour
     public void StartLoadGame(int index)
     {
         m_PlayerSaves[index].loadData();
-        //todo: load scene
+        LoadGamePlayObjects(m_PlayerSaves[index]._position.Position);
+        SceneManager.LoadScene(m_PlayerSaves[index].isFloorTwo ? 2 : 1);
     }
 
     /// <summary>
@@ -141,10 +145,11 @@ public class MainMenu : MonoBehaviour
             if ((m_PlayerSaves[i] =
                     PlayerSave.GetSaveFile(Path.Combine(PlayerSave.defaultSavePath, (i + 1).ToString()))) is null)
             {
-                if(i==0)
+                if (i == 0)
                     loadMenuErrorMessage.SetActive(true);
                 return;
             }
+
             StartCoroutine(SaveOpenDelay(i, 0.5f * i));
         }
     }
@@ -154,9 +159,8 @@ public class MainMenu : MonoBehaviour
     /// </summary>
     public void test()
     {
-       
     }
-    
+
     /// <summary>
     /// Delays playing the animation for the loading dock open animation
     /// </summary>
@@ -174,9 +178,9 @@ public class MainMenu : MonoBehaviour
         saveFileButtons[saveFileNumber].interactable = true;
         saveFileAnimator[saveFileNumber].SetBool(HasSaveFile, true);
         saveFileInfos[saveFileNumber].SetActive(true);
-        saveFileMajors[saveFileNumber].text = Player.majorToString[m_PlayerSaves[saveFileNumber]._major];
+        saveFileMajors[saveFileNumber].text = Player.MajorToString[(short)m_PlayerSaves[saveFileNumber]._major];
     }
-    
+
     /// <summary>
     /// Coroutine to have a fancy fade-in transition
     /// </summary>
@@ -196,12 +200,12 @@ public class MainMenu : MonoBehaviour
         {
             m_AnimationTime += Time.deltaTime * transitionSpeed;
             /*i.color = new Color(i.color.r, i.color.g, i.color.b, i.color.a - (Time.deltaTime / time*speed));*/
-            overlay.color = Color.Lerp(overlay.color, targetColor, m_AnimationTime/targetTime);
+            overlay.color = Color.Lerp(overlay.color, targetColor, m_AnimationTime / targetTime);
             yield return null;
         }
+
         m_OverlayAnimRunning = false;
         if (!before && action is not null) action(param);
-        
     }
 
     /// <summary>
@@ -222,6 +226,7 @@ public class MainMenu : MonoBehaviour
             overlay.color = Color.Lerp(overlay.color, Transparent, m_AnimationTime / targetTime);
             yield return null;
         }
+
         overlay.gameObject.SetActive(false);
         m_OverlayAnimRunning = true;
         if (!before && action is not null) action(param);
@@ -236,10 +241,11 @@ public class MainMenu : MonoBehaviour
         }
     }
 
-    public void LoadGamePlayObjects()
+    public void LoadGamePlayObjects(SerializableVector2 initialPosition)
     {
         Instantiate(Resources.Load<GameObject>("Prefabs/Gameplay Canvas"));
-        Instantiate(Resources.Load<GameObject>("Prefabs/Player"));
+        Instantiate(Resources.Load<GameObject>("Prefabs/Player"), (Vector3)initialPosition, Quaternion.identity);
         Instantiate(Resources.Load<GameObject>("Prefabs/Game Camera"));
+        Instantiate(Resources.Load<GameObject>("Prefabs/MinimapCamera"));
     }
 }
