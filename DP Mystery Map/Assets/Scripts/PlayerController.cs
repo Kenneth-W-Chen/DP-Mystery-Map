@@ -1,24 +1,70 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using PlayerInfo;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// This script includes movement and interact colliders.
 /// </summary>
-public class PlayerController : MonoBehaviour
+public class PlayerController : GameplayScript
 {
+    private bool wait = false;
 
-    public void toggleMovement()
+    /// <summary>
+    /// Flags for what is preventing movement and/or turning
+    /// </summary>
+    [Flags]
+    public enum WalkBlockedFlags : short
     {
-        IsGridMovement = !IsGridMovement;
+        /// <summary>
+        /// The player's movement is unrestricted
+        /// </summary>
+        CanWalk = 0,
+
+        /// <summary>
+        /// The player can't move due to the pause menu being opened
+        /// </summary>
+        Paused = 1,
+
+        /// <summary>
+        /// The player can't walk due to an object being in front of them
+        /// </summary>
+        DirectionBlocked = 2,
+
+        /// <summary>
+        /// The player can't move because they are interacting with something
+        /// </summary>
+        Interacting = 4,
+
+        /// <summary>
+        /// Flag combination indicating that the player can't walk or change facing direction
+        /// Do not set something to this value. 
+        /// </summary>
+        CantMove = Paused | Interacting,
+
+        /// <summary>
+        /// Flag combination indicating that the player can't walk. The player can still change facing direction.
+        /// Do not set something to this value.
+        /// </summary>
+        CantWalk = DirectionBlocked
     }
 
+<<<<<<< HEAD
     /// <summary>
     /// How long each step should take
     /// </summary>
     private float GridWalkDuration = .25f;
+=======
+    public static PlayerController playerControllerReference;
+
+    /// <summary>
+    /// How long each step should take
+    /// </summary>
+    private const float GridWalkDuration = .25f;
+
+>>>>>>> main
     /// <summary>
     /// The length of a single step 
     /// </summary>
@@ -28,6 +74,8 @@ public class PlayerController : MonoBehaviour
     /// The duration to consider a key held down rather than pressed
     /// </summary>
     private const float KeyHeldMinDuration = .25f;
+
+    private const float DefaultStepSpeed = 1f;
 
     /// <summary>
     /// Rigidbody attached to the player object
@@ -44,6 +92,16 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public float freeMoveSpeed = 5f;
 
+<<<<<<< HEAD
+=======
+    /// <summary>
+    /// Alternative speed. Speed is adjusted by this value when one of the Player.MovementModifierKeys is held down
+    /// </summary>
+    public float speedModifier = 2f;
+
+    private float _currentStepSpeed = DefaultStepSpeed;
+
+>>>>>>> main
     // Uses these keys for movement; public in case we have time to implement game options
     public KeyCode moveUpKey = KeyCode.W;
     public KeyCode moveDownKey = KeyCode.S;
@@ -61,6 +119,16 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     [NonSerialized] public ulong StepsTaken = 0;
 
+<<<<<<< HEAD
+=======
+    /// <summary>
+    /// Whether the player is able to walk. This will not stop any executing movement (i.e., grid movement)
+    /// This should be set by the paused function
+    /// </summary>
+    [NonSerialized] public WalkBlockedFlags WalkBlocked = WalkBlockedFlags.CanWalk;
+    /*[NonSerialized] public bool canWalkPaused = true;*/
+
+>>>>>>> main
     private MovePlayerUpdate _movePlayerUpdate;
     private MovePlayerFixedUpdate _movePlayerFixedUpdate;
     private DirectionChangeEventHandler _updateColliderHandler;
@@ -78,8 +146,9 @@ public class PlayerController : MonoBehaviour
     /// Determines if the <see cref="playerRigidbody"/> should keep moving once it reaches its position
     /// </summary>
     private bool _walkOn = false;
+
     private bool _walkOnce = false;
-    private float _walkStartTime;
+    private float _currentStepTime;
 
     // The direction the player will start walking in. Not necessarily the direction they're facing, until they start walking
     private Direction _walkDirection;
@@ -91,6 +160,7 @@ public class PlayerController : MonoBehaviour
     private float _leftKeyHeldStartTime;
     private float _rightKeyHeldStartTime;
     private Dictionary<Direction, KeyCode> _directionToKeyCode;
+    private bool _stopWalking = false;
 
     public Animator playerAnimator;
 
@@ -121,9 +191,46 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // Start is called before the first frame update
-    void Start()
+    public void StopWalking(bool waitForAnimFinish = false)
     {
+        if (_isGridMovement)
+        {
+            if (waitForAnimFinish)
+            {
+                _stopWalking = true;
+            }
+            else
+            {
+                WalkingGrid = false;
+                _walkOn = false;
+                _walkOnce = false;
+                _startPos = _endPos = transform.position;
+                _currentStepTime = GridWalkDuration;
+            }
+        }
+        else
+        {
+        }
+    }
+
+    public void toggleMovement()
+    {
+        IsGridMovement = !IsGridMovement;
+    }
+
+    // Start is called before the first frame update
+    protected override void Start()
+    {
+        if (playerControllerReference is not null)
+        {
+            Destroy(this.gameObject);
+            return;
+        }
+
+        base.Start();
+
+        playerControllerReference = this;
+
         // Initialize movement functions
         _movePlayerUpdate = GridMoveUpdate;
         _movePlayerFixedUpdate = GridMoveFixedUpdate;
@@ -139,9 +246,9 @@ public class PlayerController : MonoBehaviour
         InitializeGridPosition();
         _directionToKeyCode = new Dictionary<Direction, KeyCode>()
         {
-            { Direction.Up, Player.MoveUpKey},
-            { Direction.Down, Player.MoveDownKey},
-            { Direction.Left, Player.MoveLeftKey},
+            { Direction.Up, Player.MoveUpKey },
+            { Direction.Down, Player.MoveDownKey },
+            { Direction.Left, Player.MoveLeftKey },
             { Direction.Right, Player.MoveRightKey }
         };
     }
@@ -155,6 +262,14 @@ public class PlayerController : MonoBehaviour
 
     }
 
+
+    protected override void OnLevelLoad(Scene scene, LoadSceneMode mode)
+    {
+        base.OnLevelLoad(scene, mode);
+        UpdateMovementVals();
+    }
+
+
     private void FixedUpdate()
     {
         _movePlayerFixedUpdate();
@@ -163,6 +278,8 @@ public class PlayerController : MonoBehaviour
     private void OnDestroy()
     {
         UnsubscribeEvents();
+        if (playerControllerReference == this)
+            playerControllerReference = null;
     }
 
     private void FreeMoveUpdate()
@@ -172,7 +289,10 @@ public class PlayerController : MonoBehaviour
 
     private void GridMoveUpdate()
     {
+        if ((WalkBlocked & WalkBlockedFlags.CantMove) != 0) return;
+        CheckKeys();
         //check if key was pressed down
+<<<<<<< HEAD
         if (_keyHeld)
         {
             //calculate time since the key was pressed
@@ -207,24 +327,69 @@ public class PlayerController : MonoBehaviour
                     // do nothing? Key is considered held down at this point, but FixedUpdate turns off walking flag automatically
                     // probably not needed
                 }
+=======
+        if (!_keyHeld)
+            return;
+>>>>>>> main
 
-                /*else FacingDirection = _walkDirection;*/
-            }
-            //else we check to see if enough time has passed to consider the button held down
-            else if (timeSincePress > KeyHeldMinDuration)
+        //calculate time since the key was pressed
+        var timeSincePress = Time.time - _walkDirection switch
+        {
+            Direction.Up => _upKeyHeldStartTime,
+            Direction.Down => _downKeyHeldStartTime,
+            Direction.Left => _leftKeyHeldStartTime,
+            Direction.Right => _rightKeyHeldStartTime,
+            _ => 0
+        };
+
+        //check if the key has been released
+        if (Input.GetKeyUp(_directionToKeyCode[_walkDirection]))
+        {
+            _keyHeld = false;
+            _walkOn = false;
+            if (!(timeSincePress <= KeyHeldMinDuration))
+                return;
+            if (Player.FacingDirection != _walkDirection)
             {
-                /*Debug.Log("Turning on walk");*/
-                _walkOn = true;
                 Player.FacingDirection = _walkDirection;
+                return;
             }
 
+<<<<<<< HEAD
             Player.SetIdleFacingDirection(playerAnimator);
             CheckKeys();
+=======
+            // prevent the _endPos value from being updated in the middle of a step
+            if (!WalkingGrid && CanWalk())
+            {
+                UpdateMovementVals();
+                _walkOnce = true;
+            }
+>>>>>>> main
         }
-        //else check for key being pressed down
-        else
+        //else we check to see if enough time has passed to consider the button held down
+        else if (timeSincePress > KeyHeldMinDuration)
         {
-            CheckKeys();
+            if (_stopWalking)
+            {
+                _stopWalking = false;
+                UpdateMovementVals();
+                _walkOnce = false;
+                _walkOn = false;
+                return;
+            }
+
+            if (Player.FacingDirection != _walkDirection)
+            {
+                Player.FacingDirection = _walkDirection;
+                wait = true;
+                return;
+            }
+
+            if (wait) return;
+            if (CanWalk())
+
+                _walkOn = true;
         }
 
         //Handle direction faced while moving and idle
@@ -273,8 +438,15 @@ public class PlayerController : MonoBehaviour
             }
     }
 
+    private bool CanWalk()
+    {
+        return ((WalkBlocked & WalkBlockedFlags.CantWalk) == WalkBlockedFlags.CanWalk);
+    }
+
     private void FreeMoveFixedUpdate()
     {
+        if (WalkBlocked != WalkBlockedFlags.CanWalk)
+            return;
         _xMovement = 0;
         _yMovement = 0;
         if (Input.GetKey(Player.MoveUpKey)) _yMovement += 1f;
@@ -304,43 +476,45 @@ public class PlayerController : MonoBehaviour
             _xMovement *= freeMoveSpeed;
         }
 
+        if (Player.MovementModifierKeys.Any(key => Input.GetKey(key)))
+        {
+            _xMovement *= speedModifier;
+            _yMovement *= speedModifier;
+        }
+
         playerRigidbody.velocity = new Vector2(_xMovement, _yMovement);
     }
 
     private void GridMoveFixedUpdate()
     {
-        if (WalkingGrid)
+        wait = false;
+        if (!WalkingGrid)
         {
-            playerRigidbody.MovePosition(Vector2.Lerp(_startPos, _endPos, (Time.time - _walkStartTime) / GridWalkDuration));
-            if (playerRigidbody.position == _endPos)
+            if ((_walkOn || _walkOnce) && WalkBlocked == WalkBlockedFlags.CanWalk)
             {
-                WalkingGrid = false;
-                /*if (StepsTaken == UInt64.MaxValue)
-                {
-                    StepsTaken = 0;
-                }
-                else
-                {
-                    StepsTaken++;
-                }*/
+                WalkingGrid = true;
+                UpdateMovementVals();
             }
 
-            _walkOnce = false;
+            return;
         }
-        else if (_walkOn || _walkOnce)
+
+        _currentStepTime += Time.fixedDeltaTime;
+        playerRigidbody.MovePosition(Vector2.Lerp(_startPos, _endPos,
+            _currentStepTime * _currentStepSpeed / GridWalkDuration));
+        _walkOnce = false;
+        if (playerRigidbody.position == _endPos)
         {
-            WalkingGrid = true;
-            UpdateMovementVals();
-        }
-        /*if(_walkOn)
-        // sets the player's position and then checks if they're at the end position
-        {
-            rigidBody.MovePosition(Vector2.Lerp(_startPos, _endPos, (Time.time - _startTime) / WalkDuration));
-            if (rigidBody.position == _endPos)
+            if ((_walkOn || _walkOnce) && WalkBlocked == WalkBlockedFlags.CanWalk)
             {
-                _walkOn = false;
+                WalkingGrid = true;
+                UpdateMovementVals();
             }
-        }*/
+            else
+            {
+                WalkingGrid = false;
+            }
+        }
     }
 
     void UpdateColliders(Direction oldDirection, Direction newDirection)
@@ -396,7 +570,7 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateMovementVals()
     {
-        _walkStartTime = Time.time;
+        _currentStepTime = 0f;
         _startPos = transform.position;
         _endPos = _walkDirection switch
         {
@@ -406,6 +580,8 @@ public class PlayerController : MonoBehaviour
             Direction.Right => _startPos + GridStepSize * Vector2.right,
             _ => _endPos
         };
+        _currentStepSpeed =
+            Player.MovementModifierKeys.Any(key => Input.GetKey(key)) ? speedModifier : DefaultStepSpeed;
     }
 
     // Subscribes functions to events
@@ -417,5 +593,6 @@ public class PlayerController : MonoBehaviour
     private void UnsubscribeEvents()
     {
         Player.directionChangeEvent -= _updateColliderHandler;
+        SceneManager.sceneLoaded -= OnLevelLoad;
     }
 }

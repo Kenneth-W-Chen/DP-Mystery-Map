@@ -6,16 +6,20 @@ TagManager:
   tags:
   - Item
   - NPC
+<<<<<<< HEAD
   - Wall
+=======
+  - Stairs
+>>>>>>> main
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Player
   - Water
   - UI
   - SolidItems
-  - 
+  - PlayerTriggerObject
   - 
   - 
   - 
