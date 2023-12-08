@@ -50,6 +50,25 @@ namespace PlayerInfo
     }
 
     /// <summary>
+    /// Bitflag for game events the player has completed
+    /// </summary>
+    [Flags, Serializable]
+    public enum GameEventFlags : int
+    {
+        None = 0,
+        StartDialogue = 1,
+        Quest1 = 2,
+        Quest2 = 4,
+        Quest3 = 8,
+        Quest4 = 16,
+        Quest5 = 32,
+        Quest6 = 64,
+        Quest7 = 128,
+        
+        AllQuestsCompleted = Quest1 | Quest2 | Quest3 | Quest4 | Quest5 | Quest6 | Quest7 
+    }
+    
+    /// <summary>
     /// Event handler delegate that is fired when the player collects all items.
     /// </summary>
     public delegate void ALlItemsCollectedEventHandler();
@@ -117,6 +136,8 @@ namespace PlayerInfo
         /// </summary>
         private static Major _major = Major.None;
 
+        private static GameEventFlags _eventFlags = GameEventFlags.None;
+        
         /// <summary>
         /// Player health
         /// </summary>
