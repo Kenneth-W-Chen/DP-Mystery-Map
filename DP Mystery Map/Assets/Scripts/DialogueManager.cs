@@ -131,7 +131,7 @@ public class DialogueManager : MonoBehaviour
             return;
 
 
-        if (Input.GetKeyUp(Player.interactKey) && (dialogText.text == fullText))
+        if (Input.GetKeyUp(Player.InteractKey) && (dialogText.text == fullText))
             ContinueStory();
     }
 }
