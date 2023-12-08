@@ -278,6 +278,7 @@ namespace PlayerInfo
             _collectedItems = save._collectedItems;
             _facingDirection = save._position.direction;
             _major = save._major;
+            _eventFlags = save._eventFlags;
             _health = MaxHealth;
         }
     }
@@ -340,6 +341,7 @@ namespace PlayerInfo
                     s._collectedItems = temp._collectedItems;
                     s._position = new PlayerPosition(ref temp._position);
                     s._major = temp._major;
+                    s._eventFlags = temp._eventFlags;
                     s.isFloorTwo = temp.isFloorTwo;
                     s.SaveFilePath = saveFileName;
                 }
@@ -384,6 +386,7 @@ namespace PlayerInfo
                     this._collectedItems = temp._collectedItems;
                     this._position = new PlayerPosition(ref temp._position);
                     this._major = temp._major;
+                    this._eventFlags = temp._eventFlags;
                     this.isFloorTwo = temp.isFloorTwo;
                     this.SaveFilePath = saveFileName;
                 }
@@ -409,6 +412,7 @@ namespace PlayerInfo
             MoveRightKey = Player.MoveRightKey;*/
             SaveFilePath = Player.SaveFilePath;
             _collectedItems = Player.collectedItems;
+            _eventFlags = Player.EventFlags;
             isFloorTwo = SceneManager.GetActiveScene().buildIndex == 2;
             _position = new PlayerPosition(PlayerController.playerControllerReference.transform.position,
                 Player.FacingDirection);
