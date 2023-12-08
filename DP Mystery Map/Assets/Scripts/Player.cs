@@ -92,9 +92,6 @@ namespace PlayerInfo
         public static KeyCode MoveDownKey = KeyCode.S;
         public static KeyCode MoveLeftKey = KeyCode.A;
         public static KeyCode MoveRightKey = KeyCode.D;
-<<<<<<< HEAD
-        public static KeyCode interactKey = KeyCode.E;
-=======
         public static KeyCode InteractKey = KeyCode.P;
         public static KeyCode PauseKey = KeyCode.Escape;
         public static List<KeyCode> MovementModifierKeys = new() { KeyCode.LeftShift, KeyCode.RightShift };
@@ -104,18 +101,13 @@ namespace PlayerInfo
 
         private static readonly GameObject PlayerPrefab =
             (GameObject)UnityEngine.Resources.Load("prefabs/player", typeof(GameObject));
->>>>>>> main
 
         /// <summary>
         /// The items the player has collected
         /// </summary>
         private static Item _collectedItems = Item.None;
 
-<<<<<<< HEAD
-           /// <summary>
-=======
         /// <summary>
->>>>>>> main
         /// The direction the player is facing
         /// </summary>
         private static Direction _facingDirection = Direction.Up;
