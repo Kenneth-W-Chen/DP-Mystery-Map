@@ -11,12 +11,9 @@ public class InteractivitySystem : MonoBehaviour
     /// Player Based Interaction Components
     /// </summary>
     public Collider2D interactCollider;
-
-<<<<<<< HEAD
+    
     public TextAsset inkJson;
-=======
     [NonSerialized] public bool canInteract = true;
->>>>>>> main
 
     /// <summary>
     /// Detection/Flags for Interaction
@@ -41,12 +38,8 @@ public class InteractivitySystem : MonoBehaviour
     //Set update to constantly check for player input
     void Update()
     {
-<<<<<<< HEAD
-        if (Input.GetKeyUp(Player.interactKey))
-=======
         if (Input.GetKeyUp(Player.InteractKey) && canInteract &&
             !PlayerController.playerControllerReference.WalkingGrid)
->>>>>>> main
         {
             interactionType();
         }
