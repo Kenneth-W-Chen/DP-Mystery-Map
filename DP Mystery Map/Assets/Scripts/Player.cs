@@ -239,6 +239,18 @@ namespace PlayerInfo
             set => _major = value;
         }
 
+        public static GameEventFlags EventFlags
+        {
+            get => _eventFlags;
+            set
+            {
+                // prevent event flags from being unset, ignores setting the value to itself, and prevents invalid values
+                if ((_eventFlags & value) != _eventFlags || _eventFlags == value || (int)value > 128)
+                    return;
+                _eventFlags = value;
+            }
+        }
+
         /// <summary>
         /// Resets control bindings to the defaults.
         /// </summary>
@@ -296,6 +308,7 @@ namespace PlayerInfo
 
         public Item _collectedItems;
         public Major _major;
+        public GameEventFlags _eventFlags;
         public PlayerPosition _position;
         public bool isFloorTwo;
 
