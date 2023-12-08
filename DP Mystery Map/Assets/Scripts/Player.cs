@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -56,7 +57,7 @@ namespace PlayerInfo
     public enum GameEventFlags : int
     {
         None = 0,
-        StartDialogue = 1,
+        OpeningScene = 1,
         Quest1 = 2,
         Quest2 = 4,
         Quest3 = 8,
@@ -280,6 +281,16 @@ namespace PlayerInfo
             _major = save._major;
             _eventFlags = save._eventFlags;
             _health = MaxHealth;
+        }
+        
+        public static void SetEventFlag(GameEventFlags flag)
+        {
+            EventFlags |= flag;
+        }
+
+        public static bool IsEventFlagSet(GameEventFlags flag)
+        {
+            return (EventFlags & flag) == flag;
         }
     }
 
