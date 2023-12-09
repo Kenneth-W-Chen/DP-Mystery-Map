@@ -925,7 +925,7 @@ GameObject:
   - component: {fileID: 7407995226004596978}
   - component: {fileID: 3376390325765901728}
   m_Layer: 31
-  m_Name: 2D Dungeon PixelArt Tileset Palette
+  m_Name: 2D Dungeon PixelArt Tileset Palette 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

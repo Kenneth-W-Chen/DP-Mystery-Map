@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -50,6 +51,25 @@ namespace PlayerInfo
     }
 
     /// <summary>
+    /// Bitflag for game events the player has completed
+    /// </summary>
+    [Flags, Serializable]
+    public enum GameEventFlags : int
+    {
+        None = 0,
+        OpeningScene = 1,
+        Quest1 = 2,
+        Quest2 = 4,
+        Quest3 = 8,
+        Quest4 = 16,
+        Quest5 = 32,
+        Quest6 = 64,
+        Quest7 = 128,
+        
+        AllQuestsCompleted = Quest1 | Quest2 | Quest3 | Quest4 | Quest5 | Quest6 | Quest7 
+    }
+    
+    /// <summary>
     /// Event handler delegate that is fired when the player collects all items.
     /// </summary>
     public delegate void ALlItemsCollectedEventHandler();
@@ -92,7 +112,7 @@ namespace PlayerInfo
         public static KeyCode MoveDownKey = KeyCode.S;
         public static KeyCode MoveLeftKey = KeyCode.A;
         public static KeyCode MoveRightKey = KeyCode.D;
-        public static KeyCode InteractKey = KeyCode.P;
+        public static KeyCode InteractKey = KeyCode.E;
         public static KeyCode PauseKey = KeyCode.Escape;
         public static List<KeyCode> MovementModifierKeys = new() { KeyCode.LeftShift, KeyCode.RightShift };
 
@@ -110,13 +130,15 @@ namespace PlayerInfo
         /// <summary>
         /// The direction the player is facing
         /// </summary>
-        private static Direction _facingDirection = Direction.Up;
+        private static Direction _facingDirection = Direction.Down;
 
         /// <summary>
         /// The player's major
         /// </summary>
         private static Major _major = Major.None;
 
+        private static GameEventFlags _eventFlags = GameEventFlags.None;
+        
         /// <summary>
         /// Player health
         /// </summary>
@@ -155,6 +177,28 @@ namespace PlayerInfo
             }
         }
 
+        public static void SetIdleFacingDirection(Animator playerAnimator)
+        {
+            switch (_facingDirection)
+            {
+                case Direction.Up:
+                    playerAnimator.SetFloat("faceIdleX", 0);
+                    playerAnimator.SetFloat("faceIdleY", -1);
+                    break;
+                case Direction.Down:
+                    playerAnimator.SetFloat("faceIdleX", 0);
+                    playerAnimator.SetFloat("faceIdleY", 1);
+                    break;
+                case Direction.Left:
+                    playerAnimator.SetFloat("faceIdleX", -1);
+                    playerAnimator.SetFloat("faceIdleY", 0);
+                    break;
+                case Direction.Right:
+                    playerAnimator.SetFloat("faceIdleX", 1);
+                    playerAnimator.SetFloat("faceIdleY", 0);
+                    break;
+            }
+        }
         /// <summary>
         /// Gets or sets the player's health. Fires a <see cref="healthChangeEvent"/> if health changes.
         /// </summary>
@@ -196,6 +240,18 @@ namespace PlayerInfo
             set => _major = value;
         }
 
+        public static GameEventFlags EventFlags
+        {
+            get => _eventFlags;
+            set
+            {
+                // prevent event flags from being unset, ignores setting the value to itself, and prevents invalid values
+                if ((_eventFlags & value) != _eventFlags || _eventFlags == value || (int)value > 128)
+                    return;
+                _eventFlags = value;
+            }
+        }
+
         /// <summary>
         /// Resets control bindings to the defaults.
         /// </summary>
@@ -223,7 +279,18 @@ namespace PlayerInfo
             _collectedItems = save._collectedItems;
             _facingDirection = save._position.direction;
             _major = save._major;
+            _eventFlags = save._eventFlags;
             _health = MaxHealth;
+        }
+        
+        public static void SetEventFlag(GameEventFlags flag)
+        {
+            EventFlags |= flag;
+        }
+
+        public static bool IsEventFlagSet(GameEventFlags flag)
+        {
+            return (EventFlags & flag) == flag;
         }
     }
 
@@ -253,6 +320,7 @@ namespace PlayerInfo
 
         public Item _collectedItems;
         public Major _major;
+        public GameEventFlags _eventFlags;
         public PlayerPosition _position;
         public bool isFloorTwo;
 
@@ -284,6 +352,7 @@ namespace PlayerInfo
                     s._collectedItems = temp._collectedItems;
                     s._position = new PlayerPosition(ref temp._position);
                     s._major = temp._major;
+                    s._eventFlags = temp._eventFlags;
                     s.isFloorTwo = temp.isFloorTwo;
                     s.SaveFilePath = saveFileName;
                 }
@@ -328,6 +397,7 @@ namespace PlayerInfo
                     this._collectedItems = temp._collectedItems;
                     this._position = new PlayerPosition(ref temp._position);
                     this._major = temp._major;
+                    this._eventFlags = temp._eventFlags;
                     this.isFloorTwo = temp.isFloorTwo;
                     this.SaveFilePath = saveFileName;
                 }
@@ -353,6 +423,7 @@ namespace PlayerInfo
             MoveRightKey = Player.MoveRightKey;*/
             SaveFilePath = Player.SaveFilePath;
             _collectedItems = Player.collectedItems;
+            _eventFlags = Player.EventFlags;
             isFloorTwo = SceneManager.GetActiveScene().buildIndex == 2;
             _position = new PlayerPosition(PlayerController.playerControllerReference.transform.position,
                 Player.FacingDirection);

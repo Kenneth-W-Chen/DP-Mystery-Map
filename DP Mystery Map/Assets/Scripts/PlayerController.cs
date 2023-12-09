@@ -39,16 +39,25 @@ public class PlayerController : GameplayScript
         Interacting = 4,
 
         /// <summary>
+        /// An event is executing, so player can't move
+        /// </summary>
+        Event = 8,
+
+        Dialogue = 16,
+
+        GameLoad = 32,
+
+        /// <summary>
         /// Flag combination indicating that the player can't walk or change facing direction
         /// Do not set something to this value. 
         /// </summary>
-        CantMove = Paused | Interacting,
+        CantMove = Paused | Interacting | Event | Dialogue | GameLoad,
 
         /// <summary>
         /// Flag combination indicating that the player can't walk. The player can still change facing direction.
         /// Do not set something to this value.
         /// </summary>
-        CantWalk = DirectionBlocked
+        CantWalk = DirectionBlocked | GameLoad
     }
 
     public static PlayerController playerControllerReference;
@@ -149,6 +158,13 @@ public class PlayerController : GameplayScript
     private Dictionary<Direction, KeyCode> _directionToKeyCode;
     private bool _stopWalking = false;
 
+    public Animator playerAnimator;
+
+    /// <summary>
+    /// 2D Vector Storing Variables for The Player's Animation Controller
+    /// </summary>
+    Vector2 playerMovementController;
+
     public bool IsGridMovement
     {
         get => _isGridMovement;
@@ -236,6 +252,8 @@ public class PlayerController : GameplayScript
     // Update is called once per frame
     void Update()
     {
+        //Only allow character movement when dialogue isn't active
+        //Set player status to interacting once merged with main
         _movePlayerUpdate();
     }
 
@@ -243,6 +261,7 @@ public class PlayerController : GameplayScript
     protected override void OnLevelLoad(Scene scene, LoadSceneMode mode)
     {
         base.OnLevelLoad(scene, mode);
+        WalkBlocked &= ~WalkBlockedFlags.GameLoad;
         UpdateMovementVals();
     }
 
@@ -269,64 +288,141 @@ public class PlayerController : GameplayScript
         if ((WalkBlocked & WalkBlockedFlags.CantMove) != 0) return;
         CheckKeys();
         //check if key was pressed down
-        if (!_keyHeld)
-            return;
-
-        //calculate time since the key was pressed
-        var timeSincePress = Time.time - _walkDirection switch
+        if (_keyHeld)
         {
-            Direction.Up => _upKeyHeldStartTime,
-            Direction.Down => _downKeyHeldStartTime,
-            Direction.Left => _leftKeyHeldStartTime,
-            Direction.Right => _rightKeyHeldStartTime,
-            _ => 0
-        };
+            //calculate time since the key was pressed
+            var timeSincePress = Time.time - _walkDirection switch
+            {
+                Direction.Up => _upKeyHeldStartTime,
+                Direction.Down => _downKeyHeldStartTime,
+                Direction.Left => _leftKeyHeldStartTime,
+                Direction.Right => _rightKeyHeldStartTime,
+                _ => 0
+            };
 
-        //check if the key has been released
-        if (Input.GetKeyUp(_directionToKeyCode[_walkDirection]))
-        {
-            _keyHeld = false;
-            _walkOn = false;
-            if (!(timeSincePress <= KeyHeldMinDuration))
-                return;
-            if (Player.FacingDirection != _walkDirection)
+            //check if the key has been released
+            if (Input.GetKeyUp(_directionToKeyCode[_walkDirection]))
             {
-                Player.FacingDirection = _walkDirection;
-                return;
-            }
-
-            // prevent the _endPos value from being updated in the middle of a step
-            if (!WalkingGrid && CanWalk())
-            {
-                UpdateMovementVals();
-                _walkOnce = true;
-            }
-        }
-        //else we check to see if enough time has passed to consider the button held down
-        else if (timeSincePress > KeyHeldMinDuration)
-        {
-            if (_stopWalking)
-            {
-                _stopWalking = false;
-                UpdateMovementVals();
-                _walkOnce = false;
+                _keyHeld = false;
                 _walkOn = false;
-                return;
+                if (timeSincePress <= KeyHeldMinDuration)
+                {
+                    if (Player.FacingDirection == _walkDirection)
+                    {
+                        UpdateMovementVals();
+                        _walkOnce = true;
+                    }
+                    else
+                    {
+                        Player.FacingDirection = _walkDirection;
+                    }
+                }
+                else
+                {
+                    // do nothing? Key is considered held down at this point, but FixedUpdate turns off walking flag automatically
+                    // probably not needed
+                }
             }
 
-            if (Player.FacingDirection != _walkDirection)
+            if (!_keyHeld)
+                return;
+
+            //calculate time since the key was pressed
+            var timeSincePressed = Time.time - _walkDirection switch
             {
-                Player.FacingDirection = _walkDirection;
-                wait = true;
-                return;
+                Direction.Up => _upKeyHeldStartTime,
+                Direction.Down => _downKeyHeldStartTime,
+                Direction.Left => _leftKeyHeldStartTime,
+                Direction.Right => _rightKeyHeldStartTime,
+                _ => 0
+            };
+
+            //check if the key has been released
+            if (Input.GetKeyUp(_directionToKeyCode[_walkDirection]))
+            {
+                _keyHeld = false;
+                _walkOn = false;
+                if (!(timeSincePress <= KeyHeldMinDuration))
+                    return;
+                if (Player.FacingDirection != _walkDirection)
+                {
+                    Player.FacingDirection = _walkDirection;
+                    return;
+                }
+
+                CheckKeys();
+                // prevent the _endPos value from being updated in the middle of a step
+                if (!WalkingGrid && CanWalk())
+                {
+                    UpdateMovementVals();
+                    _walkOnce = true;
+                }
+            }
+            //else we check to see if enough time has passed to consider the button held down
+            else if (timeSincePress > KeyHeldMinDuration)
+            {
+                if (_stopWalking)
+                {
+                    _stopWalking = false;
+                    UpdateMovementVals();
+                    _walkOnce = false;
+                    _walkOn = false;
+                    return;
+                }
+
+                if (Player.FacingDirection != _walkDirection)
+                {
+                    Player.FacingDirection = _walkDirection;
+                    wait = true;
+                    return;
+                }
+
+                if (wait) return;
+                if (CanWalk())
+
+                    _walkOn = true;
             }
 
-            if (wait) return;
-            if (CanWalk())
+            playerAnimator.SetFloat("Speed", playerMovementController.sqrMagnitude);
 
-                _walkOn = true;
+            //Enable running animation if shift is held
+            if (Input.GetKey(KeyCode.LeftShift))
+                playerAnimator.SetBool("isRunning", true);
+            else
+                playerAnimator.SetBool("isRunning", false);
         }
+        else
+        {
+            //Handle direction faced while moving and idle
+            Player.SetIdleFacingDirection(playerAnimator);
+            playerAnimator.SetFloat("Speed", 0.0f);
+            playerAnimator.SetBool("isRunning", false);
+        }
+
+        switch (Player.FacingDirection)
+        {
+            case Direction.Left:
+                playerMovementController.x = -1.0f;
+                playerMovementController.y = 0.0f;
+                break;
+            case Direction.Right:
+                playerMovementController.x = 1.0f;
+                playerMovementController.y = 0.0f;
+                break;
+            case Direction.Up:
+                playerMovementController.x = 0.0f;
+                playerMovementController.y = 1.0f;
+                break;
+            case Direction.Down:
+                playerMovementController.x = 0.0f;
+                playerMovementController.y = -1.0f;
+                break;
+        }
+
+        playerAnimator.SetFloat("Horizontal", playerMovementController.x);
+        playerAnimator.SetFloat("Vertical", playerMovementController.y);
     }
+
 
     private bool CanWalk()
     {
@@ -349,7 +445,7 @@ public class PlayerController : GameplayScript
         var absY = Mathf.Abs(_yMovement);
         if (absY > 0.5f)
         {
-            Player.FacingDirection = _yMovement > 0f ? Direction.Up : Direction.Down;
+            //Player.FacingDirection = _yMovement > 0f ? Direction.Up : Direction.Down;
             if (absX > 0.5f)
             {
                 _xMovement *= _tanSpeed;
@@ -362,7 +458,7 @@ public class PlayerController : GameplayScript
         }
         else if (absX > 0.5f)
         {
-            Player.FacingDirection = _xMovement > 0f ? Direction.Right : Direction.Left;
+            //Player.FacingDirection = _xMovement > 0f ? Direction.Right : Direction.Left;
             _xMovement *= freeMoveSpeed;
         }
 
@@ -407,6 +503,7 @@ public class PlayerController : GameplayScript
         }
     }
 
+
     void UpdateColliders(Direction oldDirection, Direction newDirection)
     {
         // For rotating the interact collider to the side the player is facing
@@ -438,22 +535,19 @@ public class PlayerController : GameplayScript
             _keyHeld = true;
             _rightKeyHeldStartTime = Time.time;
         }
-
-        if (Input.GetKeyDown(moveLeftKey))
+        else if (Input.GetKeyDown(moveLeftKey))
         {
             _walkDirection = Direction.Left;
             _keyHeld = true;
             _leftKeyHeldStartTime = Time.time;
         }
-
-        if (Input.GetKeyDown(moveDownKey))
+        else if (Input.GetKeyDown(moveDownKey))
         {
             _walkDirection = Direction.Down;
             _keyHeld = true;
             _downKeyHeldStartTime = Time.time;
         }
-
-        if (Input.GetKeyDown(moveUpKey))
+        else if (Input.GetKeyDown(moveUpKey))
         {
             _walkDirection = Direction.Up;
             _keyHeld = true;

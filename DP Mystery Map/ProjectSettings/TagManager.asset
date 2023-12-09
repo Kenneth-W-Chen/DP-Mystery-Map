@@ -6,16 +6,17 @@ TagManager:
   tags:
   - Item
   - NPC
-  - Stairs
+  - Wall
+  - Dark-Wing
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Player
+  - 
   - Water
   - UI
-  - SolidItems
-  - PlayerTriggerObject
+  - 
+  - 
   - 
   - 
   - 
