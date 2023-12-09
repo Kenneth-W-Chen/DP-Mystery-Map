@@ -19,6 +19,7 @@ public class DialogueManager : MonoBehaviour
 
     private string fullText;
     private float charRevealDelay = 0.05f;
+    private bool advanceText = false;
 
     public static DialogueManager instance { get; private set; }
 
@@ -76,8 +77,6 @@ public class DialogueManager : MonoBehaviour
 
     IEnumerator ShowText()
     {
-        bool advanceText = false;
-
         if (dialogText == null)
         {
             Debug.LogError("dialogText is not assigned. Make sure to assign it in the Inspector.");
@@ -85,24 +84,18 @@ public class DialogueManager : MonoBehaviour
         }
 
         fullText = currentDialog.Continue(); // Retrieve the next portion of text
-
         for (int i = 0; i < fullText.Length; i++)
         {
             dialogText.text = fullText.Substring(0, i + 1);
 
-            //If space is pressed then text will auto reveal
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                advanceText = true;
-                Debug.Log("Space");
-            }
-
-            if (advanceText == false)
+            if (!advanceText)
                 yield return new WaitForSeconds(charRevealDelay);
             else
             {
                 dialogText.text = fullText;
+                advanceText = false;
                 yield return null;
+                break;
             }
         }
 
@@ -130,7 +123,14 @@ public class DialogueManager : MonoBehaviour
         if (!dialogIsPlaying)
             return;
         if ((Input.GetKeyDown(Player.InteractKey) || Input.GetKeyDown(KeyCode.Space) ||
-             Input.GetKeyDown(KeyCode.Mouse0)) && (dialogText.text == fullText))
-            ContinueStory();
+             Input.GetKeyDown(KeyCode.Mouse0)))
+        {
+            if(dialogText.text==fullText)
+                ContinueStory();
+            else
+            {
+                advanceText = true;
+            }
+        }
     }
 }
