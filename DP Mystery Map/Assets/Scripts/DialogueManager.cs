@@ -15,7 +15,7 @@ public class DialogueManager : MonoBehaviour
 
     private Ink.Runtime.Story currentDialog;
 
-    public static bool dialogIsPlaying { get; set; }
+    public static bool dialogIsPlaying = false;
 
     private string fullText;
     private float charRevealDelay = 0.05f;
@@ -46,16 +46,7 @@ public class DialogueManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if (Player.collectedItems == Item.None)
-        {
-            dialogIsPlaying = true;
-            dialogPanel.SetActive(true);
-        }
-        else
-        {
-            dialogIsPlaying = false;
-            dialogPanel.SetActive(false);
-        }
+        
     }
 
     public void EnterDialogueMode(TextAsset inkJSON)
@@ -125,7 +116,7 @@ public class DialogueManager : MonoBehaviour
         if ((Input.GetKeyDown(Player.InteractKey) || Input.GetKeyDown(KeyCode.Space) ||
              Input.GetKeyDown(KeyCode.Mouse0)))
         {
-            if(dialogText.text==fullText)
+            if (dialogText.text == fullText)
                 ContinueStory();
             else
             {
