@@ -27,6 +27,7 @@ public class Stairs : MonoBehaviour
         PlayerController.playerControllerReference.transform.position = _position.Position;
         Player.FacingDirection = _position.direction;
         PlayerController.playerControllerReference.StopWalking();
+        PlayerController.playerControllerReference.WalkBlocked |= PlayerController.WalkBlockedFlags.GameLoad;
         SceneManager.LoadScene(_isFloorTwo ? "FloorOne" : "FloorTwo");
     }
 }

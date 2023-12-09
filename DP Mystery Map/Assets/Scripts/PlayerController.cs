@@ -37,14 +37,14 @@ public class PlayerController : GameplayScript
         /// The player can't move because they are interacting with something
         /// </summary>
         Interacting = 4,
-        
+
         /// <summary>
         /// An event is executing, so player can't move
         /// </summary>
         Event = 8,
-        
+
         Dialogue = 16,
-        
+
         GameLoad = 32,
 
         /// <summary>
@@ -157,7 +157,7 @@ public class PlayerController : GameplayScript
     private float _rightKeyHeldStartTime;
     private Dictionary<Direction, KeyCode> _directionToKeyCode;
     private bool _stopWalking = false;
-    
+
     public Animator playerAnimator;
 
     /// <summary>
@@ -255,13 +255,13 @@ public class PlayerController : GameplayScript
         //Only allow character movement when dialogue isn't active
         //Set player status to interacting once merged with main
         _movePlayerUpdate();
-
     }
 
 
     protected override void OnLevelLoad(Scene scene, LoadSceneMode mode)
     {
         base.OnLevelLoad(scene, mode);
+        WalkBlocked &= ~WalkBlockedFlags.GameLoad;
         UpdateMovementVals();
     }
 
@@ -417,7 +417,6 @@ public class PlayerController : GameplayScript
                 playerMovementController.x = 0.0f;
                 playerMovementController.y = -1.0f;
                 break;
-
         }
 
         playerAnimator.SetFloat("Horizontal", playerMovementController.x);
@@ -426,161 +425,161 @@ public class PlayerController : GameplayScript
 
 
     private bool CanWalk()
+    {
+        return ((WalkBlocked & WalkBlockedFlags.CantWalk) == WalkBlockedFlags.CanWalk);
+    }
+
+    private void FreeMoveFixedUpdate()
+    {
+        if (WalkBlocked != WalkBlockedFlags.CanWalk)
+            return;
+        _xMovement = 0;
+        _yMovement = 0;
+        if (Input.GetKey(Player.MoveUpKey)) _yMovement += 1f;
+        if (Input.GetKey(Player.MoveDownKey)) _yMovement -= 1f;
+        if (Input.GetKey(Player.MoveRightKey)) _xMovement += 1f;
+        if (Input.GetKey(Player.MoveLeftKey)) _xMovement -= 1f;
+
+        // Check if the player is moving diagonally
+        var absX = Mathf.Abs(_xMovement);
+        var absY = Mathf.Abs(_yMovement);
+        if (absY > 0.5f)
+        {
+            //Player.FacingDirection = _yMovement > 0f ? Direction.Up : Direction.Down;
+            if (absX > 0.5f)
             {
-                return ((WalkBlocked & WalkBlockedFlags.CantWalk) == WalkBlockedFlags.CanWalk);
+                _xMovement *= _tanSpeed;
+                _yMovement *= _tanSpeed;
             }
-
-            private void FreeMoveFixedUpdate()
+            else
             {
-                if (WalkBlocked != WalkBlockedFlags.CanWalk)
-                    return;
-                _xMovement = 0;
-                _yMovement = 0;
-                if (Input.GetKey(Player.MoveUpKey)) _yMovement += 1f;
-                if (Input.GetKey(Player.MoveDownKey)) _yMovement -= 1f;
-                if (Input.GetKey(Player.MoveRightKey)) _xMovement += 1f;
-                if (Input.GetKey(Player.MoveLeftKey)) _xMovement -= 1f;
-
-                // Check if the player is moving diagonally
-                var absX = Mathf.Abs(_xMovement);
-                var absY = Mathf.Abs(_yMovement);
-                if (absY > 0.5f)
-                {
-                    //Player.FacingDirection = _yMovement > 0f ? Direction.Up : Direction.Down;
-                    if (absX > 0.5f)
-                    {
-                        _xMovement *= _tanSpeed;
-                        _yMovement *= _tanSpeed;
-                    }
-                    else
-                    {
-                        _yMovement *= freeMoveSpeed;
-                    }
-                }
-                else if (absX > 0.5f)
-                {
-                    //Player.FacingDirection = _xMovement > 0f ? Direction.Right : Direction.Left;
-                    _xMovement *= freeMoveSpeed;
-                }
-
-                if (Player.MovementModifierKeys.Any(key => Input.GetKey(key)))
-                {
-                    _xMovement *= speedModifier;
-                    _yMovement *= speedModifier;
-                }
-
-                playerRigidbody.velocity = new Vector2(_xMovement, _yMovement);
+                _yMovement *= freeMoveSpeed;
             }
+        }
+        else if (absX > 0.5f)
+        {
+            //Player.FacingDirection = _xMovement > 0f ? Direction.Right : Direction.Left;
+            _xMovement *= freeMoveSpeed;
+        }
 
-            private void GridMoveFixedUpdate()
-            {
-                wait = false;
-                if (!WalkingGrid)
-                {
+        if (Player.MovementModifierKeys.Any(key => Input.GetKey(key)))
+        {
+            _xMovement *= speedModifier;
+            _yMovement *= speedModifier;
+        }
+
+        playerRigidbody.velocity = new Vector2(_xMovement, _yMovement);
+    }
+
+    private void GridMoveFixedUpdate()
+    {
+        wait = false;
+        if (!WalkingGrid)
+        {
             if ((_walkOn || _walkOnce) && WalkBlocked == WalkBlockedFlags.CanWalk)
-                    {
-                        WalkingGrid = true;
+            {
+                WalkingGrid = true;
                 UpdateMovementVals();
-                    }
-
-                    return;
-                }
-
-                _currentStepTime += Time.fixedDeltaTime;
-                playerRigidbody.MovePosition(Vector2.Lerp(_startPos, _endPos,
-                    _currentStepTime * _currentStepSpeed / GridWalkDuration));
-                _walkOnce = false;
-                if (playerRigidbody.position == _endPos)
-                {
-                    if ((_walkOn || _walkOnce) && WalkBlocked == WalkBlockedFlags.CanWalk)
-                    {
-                        WalkingGrid = true;
-                        UpdateMovementVals();
-                    }
-                    else
-                    {
-                        WalkingGrid = false;
-                    }
-                }
             }
 
+            return;
+        }
 
-            void UpdateColliders(Direction oldDirection, Direction newDirection)
+        _currentStepTime += Time.fixedDeltaTime;
+        playerRigidbody.MovePosition(Vector2.Lerp(_startPos, _endPos,
+            _currentStepTime * _currentStepSpeed / GridWalkDuration));
+        _walkOnce = false;
+        if (playerRigidbody.position == _endPos)
+        {
+            if ((_walkOn || _walkOnce) && WalkBlocked == WalkBlockedFlags.CanWalk)
             {
-                // For rotating the interact collider to the side the player is facing
-                interactColliderTransform.transform.localRotation = Quaternion.Euler(0, 0, newDirection switch
-                {
-                    Direction.Up => 0,
-                    Direction.Down => 180,
-                    Direction.Left => 90,
-                    Direction.Right => 270,
-                    _ => 0
-                });
+                WalkingGrid = true;
+                UpdateMovementVals();
             }
-
-            private void InitializeGridPosition()
+            else
             {
-                var position = transform.position;
-                position = new Vector3(Mathf.Floor(position.x) + 0.5f, Mathf.Floor(position.y) + 0.5f,
-                    position.z);
-                transform.position = position;
-                _startPos = _endPos = position;
+                WalkingGrid = false;
             }
+        }
+    }
 
-            //checks if movement keys are pressed down
-            private void CheckKeys()
-            {
-                if (Input.GetKeyDown(moveRightKey))
-                {
-                    _walkDirection = Direction.Right;
-                    _keyHeld = true;
-                    _rightKeyHeldStartTime = Time.time;
-                }
-                else if (Input.GetKeyDown(moveLeftKey))
-                {
-                    _walkDirection = Direction.Left;
-                    _keyHeld = true;
-                    _leftKeyHeldStartTime = Time.time;
-                }
-                else if (Input.GetKeyDown(moveDownKey))
-                {
-                    _walkDirection = Direction.Down;
-                    _keyHeld = true;
-                    _downKeyHeldStartTime = Time.time;
-                }
-                else if (Input.GetKeyDown(moveUpKey))
-                {
-                    _walkDirection = Direction.Up;
-                    _keyHeld = true;
-                    _upKeyHeldStartTime = Time.time;
-                }
-            }
 
-            private void UpdateMovementVals()
-            {
-                _currentStepTime = 0f;
-                _startPos = transform.position;
-                _endPos = _walkDirection switch
-                {
-                    Direction.Up => _startPos + GridStepSize * Vector2.up,
-                    Direction.Down => _startPos + GridStepSize * Vector2.down,
-                    Direction.Left => _startPos + GridStepSize * Vector2.left,
-                    Direction.Right => _startPos + GridStepSize * Vector2.right,
-                    _ => _endPos
-                };
-                _currentStepSpeed =
-                    Player.MovementModifierKeys.Any(key => Input.GetKey(key)) ? speedModifier : DefaultStepSpeed;
-            }
+    void UpdateColliders(Direction oldDirection, Direction newDirection)
+    {
+        // For rotating the interact collider to the side the player is facing
+        interactColliderTransform.transform.localRotation = Quaternion.Euler(0, 0, newDirection switch
+        {
+            Direction.Up => 0,
+            Direction.Down => 180,
+            Direction.Left => 90,
+            Direction.Right => 270,
+            _ => 0
+        });
+    }
 
-            // Subscribes functions to events
-            private void SubscribeEvents()
-            {
-                Player.directionChangeEvent += _updateColliderHandler;
-            }
+    private void InitializeGridPosition()
+    {
+        var position = transform.position;
+        position = new Vector3(Mathf.Floor(position.x) + 0.5f, Mathf.Floor(position.y) + 0.5f,
+            position.z);
+        transform.position = position;
+        _startPos = _endPos = position;
+    }
 
-            private void UnsubscribeEvents()
-            {
-                Player.directionChangeEvent -= _updateColliderHandler;
-                SceneManager.sceneLoaded -= OnLevelLoad;
-            }
+    //checks if movement keys are pressed down
+    private void CheckKeys()
+    {
+        if (Input.GetKeyDown(moveRightKey))
+        {
+            _walkDirection = Direction.Right;
+            _keyHeld = true;
+            _rightKeyHeldStartTime = Time.time;
+        }
+        else if (Input.GetKeyDown(moveLeftKey))
+        {
+            _walkDirection = Direction.Left;
+            _keyHeld = true;
+            _leftKeyHeldStartTime = Time.time;
+        }
+        else if (Input.GetKeyDown(moveDownKey))
+        {
+            _walkDirection = Direction.Down;
+            _keyHeld = true;
+            _downKeyHeldStartTime = Time.time;
+        }
+        else if (Input.GetKeyDown(moveUpKey))
+        {
+            _walkDirection = Direction.Up;
+            _keyHeld = true;
+            _upKeyHeldStartTime = Time.time;
+        }
+    }
+
+    private void UpdateMovementVals()
+    {
+        _currentStepTime = 0f;
+        _startPos = transform.position;
+        _endPos = _walkDirection switch
+        {
+            Direction.Up => _startPos + GridStepSize * Vector2.up,
+            Direction.Down => _startPos + GridStepSize * Vector2.down,
+            Direction.Left => _startPos + GridStepSize * Vector2.left,
+            Direction.Right => _startPos + GridStepSize * Vector2.right,
+            _ => _endPos
+        };
+        _currentStepSpeed =
+            Player.MovementModifierKeys.Any(key => Input.GetKey(key)) ? speedModifier : DefaultStepSpeed;
+    }
+
+    // Subscribes functions to events
+    private void SubscribeEvents()
+    {
+        Player.directionChangeEvent += _updateColliderHandler;
+    }
+
+    private void UnsubscribeEvents()
+    {
+        Player.directionChangeEvent -= _updateColliderHandler;
+        SceneManager.sceneLoaded -= OnLevelLoad;
+    }
 }
