@@ -11,11 +11,12 @@ public class questSystem : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if(Player.collectedItems == Item.None && Player.IsEventFlagSet(GameEventFlags.OpeningScene))
+        if(newGame == true)
         {
             DialogueManager.instance.EnterDialogueMode(openingDialogue);
             Player.SetEventFlag(GameEventFlags.OpeningScene);
         }
+        newGame = false;
     }
 
     // Update is called once per frame

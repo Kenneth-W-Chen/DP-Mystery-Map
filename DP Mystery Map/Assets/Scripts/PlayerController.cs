@@ -51,12 +51,6 @@ public class PlayerController : GameplayScript
         CantWalk = DirectionBlocked
     }
 
-<<<<<<< HEAD
-    /// <summary>
-    /// How long each step should take
-    /// </summary>
-    private float GridWalkDuration = .25f;
-=======
     public static PlayerController playerControllerReference;
 
     /// <summary>
@@ -64,7 +58,6 @@ public class PlayerController : GameplayScript
     /// </summary>
     private const float GridWalkDuration = .25f;
 
->>>>>>> main
     /// <summary>
     /// The length of a single step 
     /// </summary>
@@ -92,8 +85,6 @@ public class PlayerController : GameplayScript
     /// </summary>
     public float freeMoveSpeed = 5f;
 
-<<<<<<< HEAD
-=======
     /// <summary>
     /// Alternative speed. Speed is adjusted by this value when one of the Player.MovementModifierKeys is held down
     /// </summary>
@@ -101,7 +92,6 @@ public class PlayerController : GameplayScript
 
     private float _currentStepSpeed = DefaultStepSpeed;
 
->>>>>>> main
     // Uses these keys for movement; public in case we have time to implement game options
     public KeyCode moveUpKey = KeyCode.W;
     public KeyCode moveDownKey = KeyCode.S;
@@ -119,8 +109,6 @@ public class PlayerController : GameplayScript
     /// </summary>
     [NonSerialized] public ulong StepsTaken = 0;
 
-<<<<<<< HEAD
-=======
     /// <summary>
     /// Whether the player is able to walk. This will not stop any executing movement (i.e., grid movement)
     /// This should be set by the paused function
@@ -128,7 +116,6 @@ public class PlayerController : GameplayScript
     [NonSerialized] public WalkBlockedFlags WalkBlocked = WalkBlockedFlags.CanWalk;
     /*[NonSerialized] public bool canWalkPaused = true;*/
 
->>>>>>> main
     private MovePlayerUpdate _movePlayerUpdate;
     private MovePlayerFixedUpdate _movePlayerFixedUpdate;
     private DirectionChangeEventHandler _updateColliderHandler;
@@ -258,7 +245,7 @@ public class PlayerController : GameplayScript
     {
         //Only allow character movement when dialogue isn't active
         //Set player status to interacting once merged with main
-
+        _movePlayerUpdate();
 
     }
 
@@ -292,7 +279,6 @@ public class PlayerController : GameplayScript
         if ((WalkBlocked & WalkBlockedFlags.CantMove) != 0) return;
         CheckKeys();
         //check if key was pressed down
-<<<<<<< HEAD
         if (_keyHeld)
         {
             //calculate time since the key was pressed
@@ -327,272 +313,265 @@ public class PlayerController : GameplayScript
                     // do nothing? Key is considered held down at this point, but FixedUpdate turns off walking flag automatically
                     // probably not needed
                 }
-=======
-        if (!_keyHeld)
-            return;
->>>>>>> main
-
-        //calculate time since the key was pressed
-        var timeSincePress = Time.time - _walkDirection switch
-        {
-            Direction.Up => _upKeyHeldStartTime,
-            Direction.Down => _downKeyHeldStartTime,
-            Direction.Left => _leftKeyHeldStartTime,
-            Direction.Right => _rightKeyHeldStartTime,
-            _ => 0
-        };
-
-        //check if the key has been released
-        if (Input.GetKeyUp(_directionToKeyCode[_walkDirection]))
-        {
-            _keyHeld = false;
-            _walkOn = false;
-            if (!(timeSincePress <= KeyHeldMinDuration))
-                return;
-            if (Player.FacingDirection != _walkDirection)
-            {
-                Player.FacingDirection = _walkDirection;
-                return;
             }
 
-<<<<<<< HEAD
-            Player.SetIdleFacingDirection(playerAnimator);
-            CheckKeys();
-=======
-            // prevent the _endPos value from being updated in the middle of a step
-            if (!WalkingGrid && CanWalk())
+            if (!_keyHeld)
+                return;
+
+            //calculate time since the key was pressed
+            var timeSincePressed = Time.time - _walkDirection switch
             {
-                UpdateMovementVals();
-                _walkOnce = true;
-            }
->>>>>>> main
-        }
-        //else we check to see if enough time has passed to consider the button held down
-        else if (timeSincePress > KeyHeldMinDuration)
-        {
-            if (_stopWalking)
+                Direction.Up => _upKeyHeldStartTime,
+                Direction.Down => _downKeyHeldStartTime,
+                Direction.Left => _leftKeyHeldStartTime,
+                Direction.Right => _rightKeyHeldStartTime,
+                _ => 0
+            };
+
+            //check if the key has been released
+            if (Input.GetKeyUp(_directionToKeyCode[_walkDirection]))
             {
-                _stopWalking = false;
-                UpdateMovementVals();
-                _walkOnce = false;
+                _keyHeld = false;
                 _walkOn = false;
-                return;
-            }
-
-            if (Player.FacingDirection != _walkDirection)
-            {
-                Player.FacingDirection = _walkDirection;
-                wait = true;
-                return;
-            }
-
-            if (wait) return;
-            if (CanWalk())
-
-                _walkOn = true;
-        }
-
-        //Handle direction faced while moving and idle
-            if (WalkingGrid == false)
-            {
-                playerAnimator.SetFloat("Horizontal", playerMovementController.x);
-                playerAnimator.SetFloat("Vertical", playerMovementController.y);
-                playerAnimator.SetFloat("Speed", playerMovementController.sqrMagnitude);
-            }
-            else
-            {
-            //Enable running animation if shift is held
-            if (Input.GetKey(KeyCode.LeftShift) && ((Input.GetKey(Player.MoveUpKey)) ||
-                (Input.GetKey(Player.MoveDownKey)) || (Input.GetKey(Player.MoveLeftKey)) ||
-                (Input.GetKey(Player.MoveRightKey))))
-            {
-                playerAnimator.SetBool("isRunning", true);
-                GridWalkDuration = 0.15625f;
-            }
-            else
-            {
-                playerAnimator.SetBool("isRunning", false);
-                GridWalkDuration = 0.25f;
-            }
-
-            switch (_walkDirection)
+                if (!(timeSincePress <= KeyHeldMinDuration))
+                    return;
+                if (Player.FacingDirection != _walkDirection)
                 {
-                    case Direction.Left:
-                        playerMovementController.x = -1.0f;
-                        playerMovementController.y = 0.0f;
-                        break;
-                    case Direction.Right:
-                        playerMovementController.x = 1.0f;
-                        playerMovementController.y = 0.0f;
-                        break;
-                    case Direction.Up:
-                        playerMovementController.x = 0.0f;
-                        playerMovementController.y = 1.0f;
-                        break;
-                    case Direction.Down:
-                        playerMovementController.x = 0.0f;
-                        playerMovementController.y = -1.0f;
-                        break;
+                    Player.FacingDirection = _walkDirection;
+                    return;
+                }
 
+                CheckKeys();
+                // prevent the _endPos value from being updated in the middle of a step
+                if (!WalkingGrid && CanWalk())
+                {
+                    UpdateMovementVals();
+                    _walkOnce = true;
                 }
             }
+            //else we check to see if enough time has passed to consider the button held down
+            else if (timeSincePress > KeyHeldMinDuration)
+            {
+                if (_stopWalking)
+                {
+                    _stopWalking = false;
+                    UpdateMovementVals();
+                    _walkOnce = false;
+                    _walkOn = false;
+                    return;
+                }
+
+                if (Player.FacingDirection != _walkDirection)
+                {
+                    Player.FacingDirection = _walkDirection;
+                    wait = true;
+                    return;
+                }
+
+                if (wait) return;
+                if (CanWalk())
+
+                    _walkOn = true;
+            }
+
+            playerAnimator.SetFloat("Speed", playerMovementController.sqrMagnitude);
+
+            //Enable running animation if shift is held
+            if (Input.GetKey(KeyCode.LeftShift))
+                playerAnimator.SetBool("isRunning", true);
+            else
+                playerAnimator.SetBool("isRunning", false);
+        }
+        else
+        {
+            //Handle direction faced while moving and idle
+            Player.SetIdleFacingDirection(playerAnimator);
+            playerAnimator.SetFloat("Speed", 0.0f);
+            playerAnimator.SetBool("isRunning", false);
+        }
+
+        switch (Player.FacingDirection)
+        {
+            case Direction.Left:
+                playerMovementController.x = -1.0f;
+                playerMovementController.y = 0.0f;
+                break;
+            case Direction.Right:
+                playerMovementController.x = 1.0f;
+                playerMovementController.y = 0.0f;
+                break;
+            case Direction.Up:
+                playerMovementController.x = 0.0f;
+                playerMovementController.y = 1.0f;
+                break;
+            case Direction.Down:
+                playerMovementController.x = 0.0f;
+                playerMovementController.y = -1.0f;
+                break;
+
+        }
+
+        playerAnimator.SetFloat("Horizontal", playerMovementController.x);
+        playerAnimator.SetFloat("Vertical", playerMovementController.y);
     }
+
 
     private bool CanWalk()
-    {
-        return ((WalkBlocked & WalkBlockedFlags.CantWalk) == WalkBlockedFlags.CanWalk);
-    }
-
-    private void FreeMoveFixedUpdate()
-    {
-        if (WalkBlocked != WalkBlockedFlags.CanWalk)
-            return;
-        _xMovement = 0;
-        _yMovement = 0;
-        if (Input.GetKey(Player.MoveUpKey)) _yMovement += 1f;
-        if (Input.GetKey(Player.MoveDownKey)) _yMovement -= 1f;
-        if (Input.GetKey(Player.MoveRightKey)) _xMovement += 1f;
-        if (Input.GetKey(Player.MoveLeftKey)) _xMovement -= 1f;
-
-        // Check if the player is moving diagonally
-        var absX = Mathf.Abs(_xMovement);
-        var absY = Mathf.Abs(_yMovement);
-        if (absY > 0.5f)
-        {
-            //Player.FacingDirection = _yMovement > 0f ? Direction.Up : Direction.Down;
-            if (absX > 0.5f)
             {
-                _xMovement *= _tanSpeed;
-                _yMovement *= _tanSpeed;
+                return ((WalkBlocked & WalkBlockedFlags.CantWalk) == WalkBlockedFlags.CanWalk);
             }
-            else
+
+            private void FreeMoveFixedUpdate()
             {
-                _yMovement *= freeMoveSpeed;
+                if (WalkBlocked != WalkBlockedFlags.CanWalk)
+                    return;
+                _xMovement = 0;
+                _yMovement = 0;
+                if (Input.GetKey(Player.MoveUpKey)) _yMovement += 1f;
+                if (Input.GetKey(Player.MoveDownKey)) _yMovement -= 1f;
+                if (Input.GetKey(Player.MoveRightKey)) _xMovement += 1f;
+                if (Input.GetKey(Player.MoveLeftKey)) _xMovement -= 1f;
+
+                // Check if the player is moving diagonally
+                var absX = Mathf.Abs(_xMovement);
+                var absY = Mathf.Abs(_yMovement);
+                if (absY > 0.5f)
+                {
+                    //Player.FacingDirection = _yMovement > 0f ? Direction.Up : Direction.Down;
+                    if (absX > 0.5f)
+                    {
+                        _xMovement *= _tanSpeed;
+                        _yMovement *= _tanSpeed;
+                    }
+                    else
+                    {
+                        _yMovement *= freeMoveSpeed;
+                    }
+                }
+                else if (absX > 0.5f)
+                {
+                    //Player.FacingDirection = _xMovement > 0f ? Direction.Right : Direction.Left;
+                    _xMovement *= freeMoveSpeed;
+                }
+
+                if (Player.MovementModifierKeys.Any(key => Input.GetKey(key)))
+                {
+                    _xMovement *= speedModifier;
+                    _yMovement *= speedModifier;
+                }
+
+                playerRigidbody.velocity = new Vector2(_xMovement, _yMovement);
             }
-        }
-        else if (absX > 0.5f)
-        {
-            //Player.FacingDirection = _xMovement > 0f ? Direction.Right : Direction.Left;
-            _xMovement *= freeMoveSpeed;
-        }
 
-        if (Player.MovementModifierKeys.Any(key => Input.GetKey(key)))
-        {
-            _xMovement *= speedModifier;
-            _yMovement *= speedModifier;
-        }
-
-        playerRigidbody.velocity = new Vector2(_xMovement, _yMovement);
-    }
-
-    private void GridMoveFixedUpdate()
-    {
-        wait = false;
-        if (!WalkingGrid)
-        {
+            private void GridMoveFixedUpdate()
+            {
+                wait = false;
+                if (!WalkingGrid)
+                {
             if ((_walkOn || _walkOnce) && WalkBlocked == WalkBlockedFlags.CanWalk)
-            {
-                WalkingGrid = true;
+                    {
+                        WalkingGrid = true;
                 UpdateMovementVals();
+                    }
+
+                    return;
+                }
+
+                _currentStepTime += Time.fixedDeltaTime;
+                playerRigidbody.MovePosition(Vector2.Lerp(_startPos, _endPos,
+                    _currentStepTime * _currentStepSpeed / GridWalkDuration));
+                _walkOnce = false;
+                if (playerRigidbody.position == _endPos)
+                {
+                    if ((_walkOn || _walkOnce) && WalkBlocked == WalkBlockedFlags.CanWalk)
+                    {
+                        WalkingGrid = true;
+                        UpdateMovementVals();
+                    }
+                    else
+                    {
+                        WalkingGrid = false;
+                    }
+                }
             }
 
-            return;
-        }
 
-        _currentStepTime += Time.fixedDeltaTime;
-        playerRigidbody.MovePosition(Vector2.Lerp(_startPos, _endPos,
-            _currentStepTime * _currentStepSpeed / GridWalkDuration));
-        _walkOnce = false;
-        if (playerRigidbody.position == _endPos)
-        {
-            if ((_walkOn || _walkOnce) && WalkBlocked == WalkBlockedFlags.CanWalk)
+            void UpdateColliders(Direction oldDirection, Direction newDirection)
             {
-                WalkingGrid = true;
-                UpdateMovementVals();
+                // For rotating the interact collider to the side the player is facing
+                interactColliderTransform.transform.localRotation = Quaternion.Euler(0, 0, newDirection switch
+                {
+                    Direction.Up => 0,
+                    Direction.Down => 180,
+                    Direction.Left => 90,
+                    Direction.Right => 270,
+                    _ => 0
+                });
             }
-            else
+
+            private void InitializeGridPosition()
             {
-                WalkingGrid = false;
+                var position = transform.position;
+                position = new Vector3(Mathf.Floor(position.x) + 0.5f, Mathf.Floor(position.y) + 0.5f,
+                    position.z);
+                transform.position = position;
+                _startPos = _endPos = position;
             }
-        }
-    }
 
-    void UpdateColliders(Direction oldDirection, Direction newDirection)
-    {
-        // For rotating the interact collider to the side the player is facing
-        interactColliderTransform.transform.localRotation = Quaternion.Euler(0, 0, newDirection switch
-        {
-            Direction.Up => 0,
-            Direction.Down => 180,
-            Direction.Left => 90,
-            Direction.Right => 270,
-            _ => 0
-        });
-    }
+            //checks if movement keys are pressed down
+            private void CheckKeys()
+            {
+                if (Input.GetKeyDown(moveRightKey))
+                {
+                    _walkDirection = Direction.Right;
+                    _keyHeld = true;
+                    _rightKeyHeldStartTime = Time.time;
+                }
+                else if (Input.GetKeyDown(moveLeftKey))
+                {
+                    _walkDirection = Direction.Left;
+                    _keyHeld = true;
+                    _leftKeyHeldStartTime = Time.time;
+                }
+                else if (Input.GetKeyDown(moveDownKey))
+                {
+                    _walkDirection = Direction.Down;
+                    _keyHeld = true;
+                    _downKeyHeldStartTime = Time.time;
+                }
+                else if (Input.GetKeyDown(moveUpKey))
+                {
+                    _walkDirection = Direction.Up;
+                    _keyHeld = true;
+                    _upKeyHeldStartTime = Time.time;
+                }
+            }
 
-    private void InitializeGridPosition()
-    {
-        var position = transform.position;
-        position = new Vector3(Mathf.Floor(position.x) + 0.5f, Mathf.Floor(position.y) + 0.5f,
-            position.z);
-        transform.position = position;
-        _startPos = _endPos = position;
-    }
+            private void UpdateMovementVals()
+            {
+                _currentStepTime = 0f;
+                _startPos = transform.position;
+                _endPos = _walkDirection switch
+                {
+                    Direction.Up => _startPos + GridStepSize * Vector2.up,
+                    Direction.Down => _startPos + GridStepSize * Vector2.down,
+                    Direction.Left => _startPos + GridStepSize * Vector2.left,
+                    Direction.Right => _startPos + GridStepSize * Vector2.right,
+                    _ => _endPos
+                };
+                _currentStepSpeed =
+                    Player.MovementModifierKeys.Any(key => Input.GetKey(key)) ? speedModifier : DefaultStepSpeed;
+            }
 
-    //checks if movement keys are pressed down
-    private void CheckKeys()
-    {
-        if (Input.GetKeyDown(moveRightKey))
-        {
-            _walkDirection = Direction.Right;
-            _keyHeld = true;
-            _rightKeyHeldStartTime = Time.time;
-        }
-        else if (Input.GetKeyDown(moveLeftKey))
-        {
-            _walkDirection = Direction.Left;
-            _keyHeld = true;
-            _leftKeyHeldStartTime = Time.time;
-        }
-        else if (Input.GetKeyDown(moveDownKey))
-        {
-            _walkDirection = Direction.Down;
-            _keyHeld = true;
-            _downKeyHeldStartTime = Time.time;
-        }
-        else if (Input.GetKeyDown(moveUpKey))
-        {
-            _walkDirection = Direction.Up;
-            _keyHeld = true;
-            _upKeyHeldStartTime = Time.time;
-        }
-    }
+            // Subscribes functions to events
+            private void SubscribeEvents()
+            {
+                Player.directionChangeEvent += _updateColliderHandler;
+            }
 
-    private void UpdateMovementVals()
-    {
-        _currentStepTime = 0f;
-        _startPos = transform.position;
-        _endPos = _walkDirection switch
-        {
-            Direction.Up => _startPos + GridStepSize * Vector2.up,
-            Direction.Down => _startPos + GridStepSize * Vector2.down,
-            Direction.Left => _startPos + GridStepSize * Vector2.left,
-            Direction.Right => _startPos + GridStepSize * Vector2.right,
-            _ => _endPos
-        };
-        _currentStepSpeed =
-            Player.MovementModifierKeys.Any(key => Input.GetKey(key)) ? speedModifier : DefaultStepSpeed;
-    }
-
-    // Subscribes functions to events
-    private void SubscribeEvents()
-    {
-        Player.directionChangeEvent += _updateColliderHandler;
-    }
-
-    private void UnsubscribeEvents()
-    {
-        Player.directionChangeEvent -= _updateColliderHandler;
-        SceneManager.sceneLoaded -= OnLevelLoad;
-    }
+            private void UnsubscribeEvents()
+            {
+                Player.directionChangeEvent -= _updateColliderHandler;
+                SceneManager.sceneLoaded -= OnLevelLoad;
+            }
 }

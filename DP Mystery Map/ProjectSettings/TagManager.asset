@@ -3,23 +3,16 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags:
-  - Item
-  - NPC
-<<<<<<< HEAD
-  - Wall
-=======
-  - Stairs
->>>>>>> main
+  tags: []
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Player
+  - 
   - Water
   - UI
-  - SolidItems
-  - PlayerTriggerObject
+  - 
+  - 
   - 
   - 
   - 

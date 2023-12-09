@@ -130,7 +130,7 @@ namespace PlayerInfo
         /// <summary>
         /// The direction the player is facing
         /// </summary>
-        private static Direction _facingDirection = Direction.Up;
+        private static Direction _facingDirection = Direction.Down;
 
         /// <summary>
         /// The player's major
