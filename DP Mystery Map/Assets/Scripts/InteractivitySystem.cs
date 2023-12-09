@@ -99,11 +99,30 @@ public class InteractivitySystem : MonoBehaviour
     //Update player questProgression
     private void onKeyItems()
     {
-        if(itemObject.gameObject.name == "Keys")
+        if(itemObject.gameObject.name == "keys")
         {
             Debug.Log("Congratulations Keys Found!");
             Player.collectedItems = Item.Keys;
         }
+        else if (itemObject.gameObject.name == "Pen")
+        {
+            Debug.Log("Congratulations Pen Found!");
+            Player.collectedItems = Item.Pen;
+        }
+        else if (itemObject.gameObject.name == "phone")
+        {
+            Debug.Log("Congratulations phone Found!");
+            Player.collectedItems = Item.Phone;
+            Destroy(GameObject.Find("A wing"));
+        }
+        else if (itemObject.gameObject.name == "book")
+        {
+            Debug.Log("Congratulations book Found!");
+            Player.collectedItems = Item.Pen;
+        }
+
+        inkJson = itemObject.gameObject.GetComponent<DialogueHeld>().npcLinesText[0];
+        DialogueManager.instance.EnterDialogueMode(inkJson);
     }
 
     /// <summary>
@@ -126,6 +145,13 @@ public class InteractivitySystem : MonoBehaviour
         {
             itemCollision = false;
             npcCollision = false;
+        }
+
+        //If A wing's dark overlay is present, notify player
+        if(collision.gameObject.name == "A wing")
+        {
+            inkJson = collision.gameObject.GetComponent<DialogueHeld>().npcLinesText[0];
+            DialogueManager.instance.EnterDialogueMode(inkJson);
         }
     }
 

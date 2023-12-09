@@ -91,7 +91,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   interactCollider: {fileID: 6137049103917857567}
-  inkJson: {fileID: 0}
+  musicSource: {fileID: 0}
+  finalMusicClip: {fileID: 8300000, guid: 27801ee0f75199c45a9cf864c85cb533, type: 3}
 --- !u!1 &7872879371254255490
 GameObject:
   m_ObjectHideFlags: 0

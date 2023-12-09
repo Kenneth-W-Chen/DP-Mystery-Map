@@ -6,7 +6,6 @@ using PlayerInfo;
 public class questSystem : MonoBehaviour
 {
     public TextAsset openingDialogue;
-    private bool newGame = true;
 
     // Start is called before the first frame update
     void Start()

@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Item
   - NPC
+  - Wall
+  - Dark-Wing
   layers:
   - Default
   - TransparentFX
