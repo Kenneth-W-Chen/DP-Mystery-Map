@@ -12,7 +12,7 @@ public class InteractivitySystem : MonoBehaviour
     /// </summary>
     public Collider2D interactCollider;
     
-    public TextAsset inkJson;
+    //public TextAsset inkJson;
     [NonSerialized] public bool canInteract = true;
 
     /// <summary>
@@ -23,6 +23,8 @@ public class InteractivitySystem : MonoBehaviour
     private bool itemCollision = false;
     private GameObject itemObject = null;
     private GameObject npcObject = null;
+    private TextAsset inkJson = null;
+
 
     void Start()
     {
@@ -43,6 +45,7 @@ public class InteractivitySystem : MonoBehaviour
         {
             interactionType();
         }
+
     }
 
     private void OnDestroy()
@@ -58,7 +61,7 @@ public class InteractivitySystem : MonoBehaviour
     {
         if (itemCollision)
             itemInteraction();
-        else if (npcCollision)
+        else if (npcCollision && (PlayerController.playerControllerReference.WalkBlocked != PlayerController.WalkBlockedFlags.Dialogue))
             npcInteraction();
         else
             Debug.Log("There is nothing here!");
@@ -66,8 +69,20 @@ public class InteractivitySystem : MonoBehaviour
 
 
     //Logic for NPC interaction
-    void npcInteraction()
+    private void npcInteraction()
     {
+        //Interact with NPC, allow random lines for misc NPCs
+        Debug.Log("Interacting with NPC.");
+        if (npcObject.GetComponent<DialogueHeld>().randomAsset == false)
+            inkJson = npcObject.GetComponent<DialogueHeld>().npcLinesText[UnityEngine.Random.Range(0, npcObject.GetComponent<DialogueHeld>().npcLinesText.Length)];
+        else
+            inkJson = npcObject.GetComponent<DialogueHeld>().returnRandomAsset(npcObject.GetComponent<DialogueHeld>().npcLinesText);
+
+        if (npcObject.GetComponent<DialogueHeld>().randomLine == false)
+            inkJson = npcObject.GetComponent<DialogueHeld>().npcLinesText[UnityEngine.Random.Range(0, npcObject.GetComponent<DialogueHeld>().npcLinesText.Length)];
+        else
+            inkJson = npcObject.GetComponent<DialogueHeld>().returnRandomLine(npcObject.GetComponent<DialogueHeld>().returnRandomAsset(npcObject.GetComponent<DialogueHeld>().npcLinesText));
+
         DialogueManager.instance.EnterDialogueMode(inkJson);
         npcObject = null;
     }

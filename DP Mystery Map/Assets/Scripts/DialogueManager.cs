@@ -122,11 +122,16 @@ public class DialogueManager : MonoBehaviour
     {
         if (!dialogIsPlaying)
             return;
+        else
+            PlayerController.playerControllerReference.WalkBlocked = PlayerController.WalkBlockedFlags.Dialogue;
+
         if ((Input.GetKeyDown(Player.InteractKey) || Input.GetKeyDown(KeyCode.Space) ||
              Input.GetKeyDown(KeyCode.Mouse0)))
         {
-            if(dialogText.text==fullText)
+            if((dialogText.text==fullText) && currentDialog.canContinue)
                 ContinueStory();
+            else if(!currentDialog.canContinue)
+                ExitDialog();
             else
             {
                 advanceText = true;

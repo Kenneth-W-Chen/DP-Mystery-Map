@@ -112,7 +112,7 @@ namespace PlayerInfo
         public static KeyCode MoveDownKey = KeyCode.S;
         public static KeyCode MoveLeftKey = KeyCode.A;
         public static KeyCode MoveRightKey = KeyCode.D;
-        public static KeyCode InteractKey = KeyCode.P;
+        public static KeyCode InteractKey = KeyCode.E;
         public static KeyCode PauseKey = KeyCode.Escape;
         public static List<KeyCode> MovementModifierKeys = new() { KeyCode.LeftShift, KeyCode.RightShift };
 
