@@ -37,12 +37,19 @@ public class PlayerController : GameplayScript
         /// The player can't move because they are interacting with something
         /// </summary>
         Interacting = 4,
+        
+        /// <summary>
+        /// An event is executing, so player can't move
+        /// </summary>
+        Event = 8,
+        
+        Dialogue = 16,
 
         /// <summary>
         /// Flag combination indicating that the player can't walk or change facing direction
         /// Do not set something to this value. 
         /// </summary>
-        CantMove = Paused | Interacting,
+        CantMove = Paused | Interacting | Event | Dialogue,
 
         /// <summary>
         /// Flag combination indicating that the player can't walk. The player can still change facing direction.

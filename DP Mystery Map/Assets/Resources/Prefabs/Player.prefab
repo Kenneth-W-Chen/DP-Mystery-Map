@@ -175,7 +175,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f69fa673d989074096f24a8e5f4f1c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  interactKey: 112
   interactCollider: {fileID: 6137049103917857567}
   inkJson: {fileID: 0}
 --- !u!1 &7872879371254255490
@@ -192,6 +191,7 @@ GameObject:
   - component: {fileID: 1374854384162403868}
   - component: {fileID: 8406524060184918603}
   - component: {fileID: 6096054628582895874}
+  - component: {fileID: -7309973433167734447}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -358,10 +358,12 @@ MonoBehaviour:
   playerRigidbody: {fileID: 1374854384162403868}
   interactColliderTransform: {fileID: 8262324325969140430}
   freeMoveSpeed: 5
+  speedModifier: 2
   moveUpKey: 119
   moveDownKey: 115
   moveLeftKey: 97
   moveRightKey: 100
+  playerAnimator: {fileID: -7309973433167734447}
 --- !u!222 &6096054628582895874
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -370,3 +372,24 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7872879371254255490}
   m_CullTransparentMesh: 1
+--- !u!95 &-7309973433167734447
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7872879371254255490}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 8e11c26baec35f2448e927d8d976eecc, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

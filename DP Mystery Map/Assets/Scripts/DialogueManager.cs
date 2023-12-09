@@ -10,7 +10,7 @@ using UnityEngine.UI;
 public class DialogueManager : MonoBehaviour
 {
     [SerializeField] private GameObject dialogPanel;
-    
+
     [SerializeField] private TextMeshProUGUI dialogText;
 
     private Ink.Runtime.Story currentDialog;
@@ -33,6 +33,7 @@ public class DialogueManager : MonoBehaviour
             Destroy(gameObject); // Ensure only one instance exists
         }
     }
+
     private void OnDestroy()
     {
         if (instance == this)
@@ -44,7 +45,6 @@ public class DialogueManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
         if (Player.collectedItems == Item.None)
         {
             dialogIsPlaying = true;
@@ -62,13 +62,14 @@ public class DialogueManager : MonoBehaviour
         currentDialog = new Ink.Runtime.Story(inkJSON.text);
         dialogPanel.SetActive(true);
         dialogIsPlaying = true;
-
+        PlayerController.playerControllerReference.WalkBlocked |= PlayerController.WalkBlockedFlags.Dialogue;
         ContinueStory();
     }
 
-    private void ExitDialog() 
+    private void ExitDialog()
     {
         dialogText.text = "";
+        PlayerController.playerControllerReference.WalkBlocked &= ~PlayerController.WalkBlockedFlags.Dialogue;
         dialogPanel.SetActive(false);
         dialogIsPlaying = false;
     }
@@ -103,7 +104,6 @@ public class DialogueManager : MonoBehaviour
                 dialogText.text = fullText;
                 yield return null;
             }
-            
         }
 
         if (!advanceText)
@@ -129,9 +129,8 @@ public class DialogueManager : MonoBehaviour
     {
         if (!dialogIsPlaying)
             return;
-
-
-        if (Input.GetKeyUp(Player.InteractKey) && (dialogText.text == fullText))
+        if ((Input.GetKeyDown(Player.InteractKey) || Input.GetKeyDown(KeyCode.Space) ||
+             Input.GetKeyDown(KeyCode.Mouse0)) && (dialogText.text == fullText))
             ContinueStory();
     }
 }
