@@ -44,18 +44,20 @@ public class PlayerController : GameplayScript
         Event = 8,
         
         Dialogue = 16,
+        
+        GameLoad = 32,
 
         /// <summary>
         /// Flag combination indicating that the player can't walk or change facing direction
         /// Do not set something to this value. 
         /// </summary>
-        CantMove = Paused | Interacting | Event | Dialogue,
+        CantMove = Paused | Interacting | Event | Dialogue | GameLoad,
 
         /// <summary>
         /// Flag combination indicating that the player can't walk. The player can still change facing direction.
         /// Do not set something to this value.
         /// </summary>
-        CantWalk = DirectionBlocked
+        CantWalk = DirectionBlocked | GameLoad
     }
 
     public static PlayerController playerControllerReference;
@@ -155,7 +157,7 @@ public class PlayerController : GameplayScript
     private float _rightKeyHeldStartTime;
     private Dictionary<Direction, KeyCode> _directionToKeyCode;
     private bool _stopWalking = false;
-
+    
     public Animator playerAnimator;
 
     /// <summary>
